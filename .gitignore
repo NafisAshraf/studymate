@@ -40,3 +40,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Claude Code / IDE
+.claude/
+.agents/
+.agent/
+.cursor/
+.superpowers/
+.convex/
+
+# Local development
+datalab/
