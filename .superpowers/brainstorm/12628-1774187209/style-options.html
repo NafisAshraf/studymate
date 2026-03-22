@@ -1,0 +1,106 @@
+<h2>Color & Font Direction</h2>
+<p class="subtitle">Pick the vibe that feels right — we'll refine from there</p>
+
+<div class="cards">
+  <div class="card" data-choice="style-a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 20px; background: #111;">
+      <div style="display: flex; height: 260px; gap: 0; border-radius: 8px; overflow: hidden;">
+        <!-- Sidebar -->
+        <div style="width: 200px; background: #0a0a0a; padding: 16px; display: flex; flex-direction: column; gap: 10px; border-right: 1px solid #1f1f1f;">
+          <div style="font-family: 'Inter', system-ui, sans-serif; color: #e0e0e0; font-weight: 600; font-size: 14px; letter-spacing: -0.3px;">LearnBase</div>
+          <div style="background: #10b981; color: #000; padding: 8px 12px; border-radius: 8px; text-align: center; font-family: 'Inter', system-ui, sans-serif; font-size: 11px; font-weight: 600;">+ New Chat</div>
+          <div style="border-top: 1px solid #1f1f1f; padding-top: 8px;">
+            <div style="font-family: 'Inter', system-ui, sans-serif; color: #555; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Library</div>
+            <div style="font-family: 'Inter', system-ui, sans-serif; padding: 6px 10px; border-radius: 6px; color: #10b981; background: #10b98115; font-size: 12px; border-left: 2px solid #10b981;">Books</div>
+          </div>
+          <div style="border-top: 1px solid #1f1f1f; padding-top: 8px;">
+            <div style="font-family: 'Inter', system-ui, sans-serif; color: #555; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Recent</div>
+            <div style="font-family: 'Inter', system-ui, sans-serif; padding: 5px 10px; border-radius: 4px; color: #888; font-size: 11px;">Quadratic formula</div>
+            <div style="font-family: 'Inter', system-ui, sans-serif; padding: 5px 10px; border-radius: 4px; color: #888; font-size: 11px;">Newton's laws</div>
+          </div>
+        </div>
+        <!-- Main -->
+        <div style="flex: 1; background: #111; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; font-family: 'Inter', system-ui, sans-serif;">
+          <div style="font-size: 18px; color: #f0f0f0; font-weight: 500; letter-spacing: -0.3px;">What would you like to learn?</div>
+          <div style="color: #555; font-size: 12px;">Ask anything — answers sourced from your books</div>
+          <div style="margin-top: 16px; width: 80%; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center;">
+            <span style="flex: 1; color: #444; font-size: 12px;">Type your question...</span>
+            <span style="background: #10b981; color: #000; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 600;">→</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A: Emerald + Inter</h3>
+      <p>Clean, modern. Emerald green accent (#10b981). Inter font family — geometric, highly readable. True black backgrounds. Professional feel.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="style-b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 20px; background: #111;">
+      <div style="display: flex; height: 260px; gap: 0; border-radius: 8px; overflow: hidden;">
+        <!-- Sidebar -->
+        <div style="width: 200px; background: #0c0c0f; padding: 16px; display: flex; flex-direction: column; gap: 10px; border-right: 1px solid #1c1c22;">
+          <div style="font-family: 'DM Sans', system-ui, sans-serif; color: #e8e8e8; font-weight: 700; font-size: 14px;">LearnBase</div>
+          <div style="background: #3b82f6; color: #fff; padding: 8px 12px; border-radius: 8px; text-align: center; font-family: 'DM Sans', system-ui, sans-serif; font-size: 11px; font-weight: 600;">+ New Chat</div>
+          <div style="border-top: 1px solid #1c1c22; padding-top: 8px;">
+            <div style="font-family: 'DM Sans', system-ui, sans-serif; color: #555; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Library</div>
+            <div style="font-family: 'DM Sans', system-ui, sans-serif; padding: 6px 10px; border-radius: 6px; color: #3b82f6; background: #3b82f615; font-size: 12px; border-left: 2px solid #3b82f6;">Books</div>
+          </div>
+          <div style="border-top: 1px solid #1c1c22; padding-top: 8px;">
+            <div style="font-family: 'DM Sans', system-ui, sans-serif; color: #555; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Recent</div>
+            <div style="font-family: 'DM Sans', system-ui, sans-serif; padding: 5px 10px; border-radius: 4px; color: #888; font-size: 11px;">Quadratic formula</div>
+            <div style="font-family: 'DM Sans', system-ui, sans-serif; padding: 5px 10px; border-radius: 4px; color: #888; font-size: 11px;">Newton's laws</div>
+          </div>
+        </div>
+        <!-- Main -->
+        <div style="flex: 1; background: #0f0f14; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; font-family: 'DM Sans', system-ui, sans-serif;">
+          <div style="font-size: 18px; color: #f0f0f0; font-weight: 600;">What would you like to learn?</div>
+          <div style="color: #555; font-size: 12px;">Ask anything — answers sourced from your books</div>
+          <div style="margin-top: 16px; width: 80%; background: #16161d; border: 1px solid #22222d; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center;">
+            <span style="flex: 1; color: #444; font-size: 12px;">Type your question...</span>
+            <span style="background: #3b82f6; color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 600;">→</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B: Blue + DM Sans</h3>
+      <p>Confident, bold. Blue accent (#3b82f6). DM Sans — slightly rounded, warm geometric. Navy-tinted dark backgrounds. Notion/Linear inspired.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="style-c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 20px; background: #111;">
+      <div style="display: flex; height: 260px; gap: 0; border-radius: 8px; overflow: hidden;">
+        <!-- Sidebar -->
+        <div style="width: 200px; background: #0d0d0d; padding: 16px; display: flex; flex-direction: column; gap: 10px; border-right: 1px solid #1e1e1e;">
+          <div style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #e8e8e8; font-weight: 700; font-size: 14px;">LearnBase</div>
+          <div style="background: #f59e0b; color: #000; padding: 8px 12px; border-radius: 8px; text-align: center; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; font-size: 11px; font-weight: 700;">+ New Chat</div>
+          <div style="border-top: 1px solid #1e1e1e; padding-top: 8px;">
+            <div style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #555; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Library</div>
+            <div style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif; padding: 6px 10px; border-radius: 6px; color: #f59e0b; background: #f59e0b15; font-size: 12px; border-left: 2px solid #f59e0b;">Books</div>
+          </div>
+          <div style="border-top: 1px solid #1e1e1e; padding-top: 8px;">
+            <div style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #555; font-size: 9px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;">Recent</div>
+            <div style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif; padding: 5px 10px; border-radius: 4px; color: #888; font-size: 11px;">Quadratic formula</div>
+            <div style="font-family: 'Plus Jakarta Sans', system-ui, sans-serif; padding: 5px 10px; border-radius: 4px; color: #888; font-size: 11px;">Newton's laws</div>
+          </div>
+        </div>
+        <!-- Main -->
+        <div style="flex: 1; background: #111; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; font-family: 'Plus Jakarta Sans', system-ui, sans-serif;">
+          <div style="font-size: 18px; color: #f0f0f0; font-weight: 600;">What would you like to learn?</div>
+          <div style="color: #555; font-size: 12px;">Ask anything — answers sourced from your books</div>
+          <div style="margin-top: 16px; width: 80%; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center;">
+            <span style="flex: 1; color: #444; font-size: 12px;">Type your question...</span>
+            <span style="background: #f59e0b; color: #000; padding: 4px 10px; border-radius: 6px; font-size: 10px; font-weight: 700;">→</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C: Amber + Plus Jakarta Sans</h3>
+      <p>Warm, approachable. Amber/gold accent (#f59e0b). Plus Jakarta Sans — friendly, slightly rounded. Warm neutral backgrounds. Feels inviting for studying.</p>
+    </div>
+  </div>
+</div>

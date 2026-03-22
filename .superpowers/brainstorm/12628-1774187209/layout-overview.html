@@ -1,0 +1,218 @@
+<h2>Platform Layout Overview</h2>
+<p class="subtitle">Dark theme, sidebar + main content area — similar to ChatGPT/Claude</p>
+
+<div class="cards">
+  <div class="card" data-choice="layout-a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 20px; background: #1a1a2e;">
+      <div style="display: flex; height: 320px; gap: 0; font-family: monospace; font-size: 11px; color: #a0a0b0; border-radius: 8px; overflow: hidden;">
+        <!-- Sidebar -->
+        <div style="width: 240px; background: #0f0f1a; padding: 16px; display: flex; flex-direction: column; gap: 12px; border-right: 1px solid #2a2a3e;">
+          <div style="color: #7c5cfc; font-weight: bold; font-size: 13px;">📚 StudyMate</div>
+          <div style="background: #7c5cfc; color: white; padding: 8px 12px; border-radius: 6px; text-align: center; font-size: 11px;">+ New Chat</div>
+          <div style="border-top: 1px solid #2a2a3e; padding-top: 8px;">
+            <div style="color: #666; font-size: 10px; text-transform: uppercase; margin-bottom: 6px;">Library</div>
+            <div style="padding: 6px 8px; border-radius: 4px; background: #1a1a2e;">📖 Books</div>
+          </div>
+          <div style="border-top: 1px solid #2a2a3e; padding-top: 8px; flex: 1;">
+            <div style="color: #666; font-size: 10px; text-transform: uppercase; margin-bottom: 6px;">Recent Chats</div>
+            <div style="padding: 5px 8px; border-radius: 4px; margin-bottom: 4px; background: #1a1a2e;">Quadratic equations...</div>
+            <div style="padding: 5px 8px; border-radius: 4px; margin-bottom: 4px;">Integration by parts</div>
+            <div style="padding: 5px 8px; border-radius: 4px; margin-bottom: 4px;">Newton's laws</div>
+            <div style="padding: 5px 8px; border-radius: 4px;">Organic chemistry</div>
+          </div>
+        </div>
+        <!-- Main Chat Area -->
+        <div style="flex: 1; background: #12121e; display: flex; flex-direction: column;">
+          <div style="flex: 1; padding: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px;">
+            <div style="font-size: 20px; color: #e0e0f0;">What would you like to learn?</div>
+            <div style="color: #666; font-size: 11px;">Ask any question — I'll find relevant info from your books</div>
+          </div>
+          <div style="padding: 16px 24px;">
+            <div style="background: #1a1a2e; border: 1px solid #2a2a3e; border-radius: 12px; padding: 12px 16px; display: flex; align-items: center; gap: 8px;">
+              <span style="flex: 1; color: #666;">Ask a question...</span>
+              <span style="background: #7c5cfc; color: white; padding: 4px 8px; border-radius: 6px; font-size: 10px;">↵</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Chat View (Default Landing)</h3>
+      <p>User lands directly on chat. Sidebar shows "New Chat", "Books" section, and recent chat history. Clean empty state with prompt.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="layout-b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 20px; background: #1a1a2e;">
+      <div style="display: flex; height: 320px; gap: 0; font-family: monospace; font-size: 11px; color: #a0a0b0; border-radius: 8px; overflow: hidden;">
+        <!-- Sidebar -->
+        <div style="width: 240px; background: #0f0f1a; padding: 16px; display: flex; flex-direction: column; gap: 12px; border-right: 1px solid #2a2a3e;">
+          <div style="color: #7c5cfc; font-weight: bold; font-size: 13px;">📚 StudyMate</div>
+          <div style="background: #7c5cfc; color: white; padding: 8px 12px; border-radius: 6px; text-align: center; font-size: 11px;">+ New Chat</div>
+          <div style="border-top: 1px solid #2a2a3e; padding-top: 8px;">
+            <div style="color: #666; font-size: 10px; text-transform: uppercase; margin-bottom: 6px;">Library</div>
+            <div style="padding: 6px 8px; border-radius: 4px; background: #1a1a2e;">📖 Books</div>
+          </div>
+          <div style="border-top: 1px solid #2a2a3e; padding-top: 8px; flex: 1;">
+            <div style="color: #666; font-size: 10px; text-transform: uppercase; margin-bottom: 6px;">Recent Chats</div>
+            <div style="padding: 5px 8px; border-radius: 4px; margin-bottom: 4px; background: #1a1a2e;">Quadratic equations...</div>
+            <div style="padding: 5px 8px; border-radius: 4px; margin-bottom: 4px;">Integration by parts</div>
+            <div style="padding: 5px 8px; border-radius: 4px;">Newton's laws</div>
+          </div>
+        </div>
+        <!-- Books Area -->
+        <div style="flex: 1; background: #12121e; display: flex; flex-direction: column;">
+          <div style="padding: 20px 24px; border-bottom: 1px solid #2a2a3e; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 16px; color: #e0e0f0; font-weight: bold;">Your Books</div>
+            <div style="background: #7c5cfc; color: white; padding: 6px 14px; border-radius: 6px; font-size: 11px;">+ Add Book</div>
+          </div>
+          <div style="padding: 20px 24px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;">
+            <div style="background: #1a1a2e; border: 1px solid #2a2a3e; border-radius: 8px; padding: 16px;">
+              <div style="font-size: 24px; margin-bottom: 8px;">📕</div>
+              <div style="color: #e0e0f0; font-size: 12px; font-weight: bold;">Mathematics 9-10</div>
+              <div style="color: #666; font-size: 10px; margin-top: 4px;">42 sections · 156 chunks</div>
+              <div style="color: #4ade80; font-size: 10px; margin-top: 6px;">● Ready</div>
+            </div>
+            <div style="background: #1a1a2e; border: 1px solid #2a2a3e; border-radius: 8px; padding: 16px;">
+              <div style="font-size: 24px; margin-bottom: 8px;">📗</div>
+              <div style="color: #e0e0f0; font-size: 12px; font-weight: bold;">Physics 11-12</div>
+              <div style="color: #666; font-size: 10px; margin-top: 4px;">38 sections · 142 chunks</div>
+              <div style="color: #f59e0b; font-size: 10px; margin-top: 6px;">⟳ Embedding...</div>
+            </div>
+            <div style="background: #1a1a2e; border: 1px dashed #2a2a3e; border-radius: 8px; padding: 16px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px;">
+              <div style="font-size: 24px;">+</div>
+              <div style="color: #666; font-size: 10px;">Drop JSON here</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Books View</h3>
+      <p>Grid of uploaded books with status indicators. "Add Book" button opens upload modal. Shows section/chunk counts and processing status.</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="layout-c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding: 20px; background: #1a1a2e;">
+      <div style="display: flex; height: 320px; gap: 0; font-family: monospace; font-size: 11px; color: #a0a0b0; border-radius: 8px; overflow: hidden;">
+        <!-- Sidebar -->
+        <div style="width: 240px; background: #0f0f1a; padding: 16px; display: flex; flex-direction: column; gap: 12px; border-right: 1px solid #2a2a3e;">
+          <div style="color: #7c5cfc; font-weight: bold; font-size: 13px;">📚 StudyMate</div>
+          <div style="background: #7c5cfc; color: white; padding: 8px 12px; border-radius: 6px; text-align: center; font-size: 11px;">+ New Chat</div>
+          <div style="border-top: 1px solid #2a2a3e; padding-top: 8px;">
+            <div style="color: #666; font-size: 10px; text-transform: uppercase; margin-bottom: 6px;">Library</div>
+            <div style="padding: 6px 8px; border-radius: 4px; background: #7c5cfc22; border-left: 2px solid #7c5cfc;">📖 Books</div>
+          </div>
+          <div style="border-top: 1px solid #2a2a3e; padding-top: 8px; flex: 1;">
+            <div style="color: #666; font-size: 10px; text-transform: uppercase; margin-bottom: 6px;">Recent Chats</div>
+            <div style="padding: 5px 8px;">Quadratic equations...</div>
+          </div>
+        </div>
+        <!-- Book Content Viewer -->
+        <div style="flex: 1; background: #12121e; display: flex; flex-direction: column;">
+          <div style="padding: 16px 24px; border-bottom: 1px solid #2a2a3e;">
+            <div style="color: #666; font-size: 10px;">← Back to Books</div>
+            <div style="font-size: 14px; color: #e0e0f0; font-weight: bold; margin-top: 4px;">Mathematics 9-10</div>
+          </div>
+          <div style="padding: 16px 24px; flex: 1; overflow: auto;">
+            <div style="margin-bottom: 4px;">
+              <div style="padding: 8px 12px; background: #1a1a2e; border-radius: 6px; cursor: pointer; display: flex; justify-content: space-between;">
+                <span style="color: #e0e0f0;">▼ Chapter 1: Sets and Functions</span>
+                <span style="color: #666; font-size: 10px;">12 sections</span>
+              </div>
+              <div style="padding-left: 20px; margin-top: 4px;">
+                <div style="padding: 6px 12px; background: #1a1a2e; border-radius: 6px; margin-bottom: 4px; display: flex; justify-content: space-between;">
+                  <span style="color: #a0a0f0;">▶ 1.1 Introduction to Sets</span>
+                  <span style="color: #666; font-size: 10px;">5 blocks</span>
+                </div>
+                <div style="padding: 6px 12px; background: #1a1a2e; border-radius: 6px; margin-bottom: 4px;">
+                  <span style="color: #a0a0f0;">▶ 1.2 Subsets and Operations</span>
+                </div>
+              </div>
+            </div>
+            <div style="margin-bottom: 4px;">
+              <div style="padding: 8px 12px; background: #1a1a2e; border-radius: 6px;">
+                <span style="color: #e0e0f0;">▶ Chapter 2: Polynomials</span>
+              </div>
+            </div>
+            <div style="margin-bottom: 4px;">
+              <div style="padding: 8px 12px; background: #1a1a2e; border-radius: 6px;">
+                <span style="color: #e0e0f0;">▶ Chapter 3: Coordinate Geometry</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>Book Content Viewer (Accordion)</h3>
+      <p>Collapsible tree structure. Click headings to expand/collapse. Nested indentation shows hierarchy. Content rendered with proper math/markdown at leaf level.</p>
+    </div>
+  </div>
+</div>
+
+<h3 style="margin-top: 24px;">Active Chat with Citations</h3>
+<div class="mockup">
+  <div class="mockup-header">Chat Session with Citation Panel</div>
+  <div class="mockup-body" style="background: #12121e; padding: 0;">
+    <div style="display: flex; height: 300px; font-family: monospace; font-size: 11px; color: #a0a0b0;">
+      <!-- Chat Area -->
+      <div style="flex: 1; display: flex; flex-direction: column;">
+        <div style="flex: 1; padding: 16px; overflow: auto;">
+          <!-- User message -->
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 16px;">
+            <div style="background: #7c5cfc; color: white; padding: 10px 14px; border-radius: 12px 12px 2px 12px; max-width: 70%;">
+              What is the quadratic formula and when do we use it?
+            </div>
+          </div>
+          <!-- Status indicators -->
+          <div style="margin-bottom: 8px; display: flex; flex-direction: column; gap: 3px;">
+            <div style="color: #4ade80; font-size: 9px;">✓ Query rewritten</div>
+            <div style="color: #4ade80; font-size: 9px;">✓ 8 chunks retrieved</div>
+            <div style="color: #4ade80; font-size: 9px;">✓ Reranked to top 5</div>
+            <div style="color: #f59e0b; font-size: 9px;">⟳ Generating answer...</div>
+          </div>
+          <!-- AI response -->
+          <div style="background: #1a1a2e; padding: 14px; border-radius: 12px; max-width: 85%;">
+            <div style="color: #e0e0f0; line-height: 1.6;">
+              The <strong>quadratic formula</strong> is used to find the roots of a quadratic equation ax² + bx + c = 0. The formula is:
+              <div style="background: #0f0f1a; padding: 8px 12px; border-radius: 6px; margin: 8px 0; text-align: center; color: #a0a0f0;">
+                x = (-b ± √(b² - 4ac)) / 2a
+              </div>
+              We use it when factoring is difficult or impossible <span style="background: #7c5cfc44; color: #b0a0ff; padding: 1px 4px; border-radius: 3px; cursor: pointer; font-size: 10px;">[1]</span>. The discriminant (b² - 4ac) tells us the nature of roots <span style="background: #7c5cfc44; color: #b0a0ff; padding: 1px 4px; border-radius: 3px; cursor: pointer; font-size: 10px;">[2]</span>...
+            </div>
+          </div>
+        </div>
+        <!-- Input -->
+        <div style="padding: 12px 16px; border-top: 1px solid #2a2a3e;">
+          <div style="background: #1a1a2e; border: 1px solid #2a2a3e; border-radius: 10px; padding: 10px 14px; display: flex;">
+            <span style="flex: 1; color: #666;">Ask a follow-up...</span>
+            <span style="color: #7c5cfc;">↵</span>
+          </div>
+        </div>
+      </div>
+      <!-- Citation Panel -->
+      <div style="width: 280px; background: #0f0f1a; border-left: 1px solid #2a2a3e; padding: 12px; overflow: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <div style="color: #e0e0f0; font-weight: bold; font-size: 12px;">Sources</div>
+          <div style="color: #666; cursor: pointer;">✕</div>
+        </div>
+        <div style="background: #7c5cfc22; border: 1px solid #7c5cfc44; border-radius: 6px; padding: 10px; margin-bottom: 8px;">
+          <div style="color: #7c5cfc; font-size: 10px; font-weight: bold;">[1] Mathematics 9-10</div>
+          <div style="color: #666; font-size: 9px; margin: 2px 0;">Ch 4: Quadratic Equations › 4.3 Formula Method</div>
+          <div style="color: #a0a0b0; font-size: 10px; margin-top: 6px; line-height: 1.4;">
+            "When the quadratic equation cannot be easily factored, we use the quadratic formula to find its roots..."
+          </div>
+        </div>
+        <div style="background: #1a1a2e; border: 1px solid #2a2a3e; border-radius: 6px; padding: 10px;">
+          <div style="color: #a0a0f0; font-size: 10px; font-weight: bold;">[2] Mathematics 9-10</div>
+          <div style="color: #666; font-size: 9px; margin: 2px 0;">Ch 4: Quadratic Equations › 4.4 Discriminant</div>
+          <div style="color: #a0a0b0; font-size: 10px; margin-top: 6px; line-height: 1.4;">
+            "The discriminant D = b² - 4ac determines the nature of roots: if D > 0, two distinct real roots..."
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

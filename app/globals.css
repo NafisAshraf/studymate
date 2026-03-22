@@ -1,0 +1,168 @@
+@import "tailwindcss";
+@import "katex/dist/katex.min.css";
+
+:root {
+  --bg-primary: #090b0a;
+  --bg-secondary: #080a09;
+  --bg-surface: #0c0e0c;
+  --bg-elevated: #111411;
+  --bg-hover: #141e16;
+  --border: #1a2a1e;
+  --border-subtle: #101a14;
+  --accent: #0ea272;
+  --accent-secondary: #2ec48a;
+  --accent-muted: rgba(14, 162, 114, 0.1);
+  --text-primary: #e4f0ea;
+  --text-secondary: #6b7c72;
+  --text-muted: #3a5545;
+  --text-label: #1a3025;
+}
+
+@theme inline {
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-secondary: var(--bg-secondary);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
+  --color-bg-hover: var(--bg-hover);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-accent: var(--accent);
+  --color-accent-secondary: var(--accent-secondary);
+  --color-accent-muted: var(--accent-muted);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-label: var(--text-label);
+  --font-display: "Instrument Serif", serif;
+  --font-body: "Outfit", sans-serif;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  font-family: var(--font-body);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* KaTeX overrides for dark theme */
+.katex {
+  color: var(--text-primary);
+}
+
+.katex .mord,
+.katex .mbin,
+.katex .mrel,
+.katex .mopen,
+.katex .mclose,
+.katex .mpunct,
+.katex .minner {
+  color: var(--text-primary);
+}
+
+/* Markdown content styling */
+.prose-studymate {
+  color: var(--text-primary);
+  line-height: 1.7;
+}
+
+.prose-studymate h1,
+.prose-studymate h2,
+.prose-studymate h3,
+.prose-studymate h4 {
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--text-primary);
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose-studymate p {
+  margin-bottom: 0.75em;
+}
+
+.prose-studymate ul,
+.prose-studymate ol {
+  padding-left: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.prose-studymate li {
+  margin-bottom: 0.25em;
+}
+
+.prose-studymate code {
+  background: var(--bg-elevated);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.prose-studymate pre {
+  background: var(--bg-elevated);
+  padding: 1em;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin-bottom: 0.75em;
+}
+
+.prose-studymate pre code {
+  background: none;
+  padding: 0;
+}
+
+.prose-studymate blockquote {
+  border-left: 2px solid var(--accent);
+  padding-left: 1em;
+  color: var(--text-secondary);
+  margin-bottom: 0.75em;
+}
+
+.prose-studymate table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 0.75em;
+}
+
+.prose-studymate th,
+.prose-studymate td {
+  border: 1px solid var(--border);
+  padding: 0.5em 0.75em;
+  text-align: left;
+}
+
+.prose-studymate th {
+  background: var(--bg-elevated);
+  font-weight: 600;
+}
+
+.prose-studymate img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 0.75em 0;
+}
+
+.prose-studymate a {
+  color: var(--accent-secondary);
+  text-decoration: underline;
+}

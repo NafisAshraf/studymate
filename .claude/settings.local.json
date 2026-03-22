@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npx convex:*)",
+      "Bash(npx next:*)",
+      "Bash(node /tmp/analyze.mjs)",
+      "Bash(source .env.local)",
+      "Bash(node -e \":*)",
+      "Bash(NEXT_PUBLIC_CONVEX_URL=https://reminiscent-kiwi-375.convex.cloud node -e \":*)"
+    ]
+  }
+}

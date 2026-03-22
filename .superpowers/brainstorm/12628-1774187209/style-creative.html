@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Outfit:wght@300;400;500;600;700&family=Sora:wght@300;400;500;600;700&family=Archivo:wght@400;500;600;700;800;900&family=General+Sans:wght@400;500;600;700&family=Satoshi:wght@400;500;700;900&family=Cabinet+Grotesk:wght@400;500;700;800&family=Instrument+Serif:ital,wght@0,400;1,400&family=Playfair+Display:wght@400;500;600;700&family=Crimson+Pro:wght@300;400;500;600&family=Source+Serif+4:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0a; color: #e0e0e0; padding: 32px; }
+  h1 { font-family: 'Outfit', sans-serif; font-size: 28px; color: #fff; margin-bottom: 8px; }
+  .subtitle { font-family: 'Outfit', sans-serif; color: #666; margin-bottom: 32px; font-size: 14px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+  .card {
+    border: 1px solid #1e1e1e;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #0f0f0f;
+  }
+  .card:hover { border-color: #333; transform: translateY(-2px); }
+  .card.selected { border-color: #10b981; box-shadow: 0 0 20px #10b98122; }
+  .card-preview { padding: 0; }
+  .card-info { padding: 16px 20px; border-top: 1px solid #1e1e1e; }
+  .card-info h3 { font-family: 'Outfit', sans-serif; font-size: 15px; color: #fff; margin-bottom: 4px; }
+  .card-info p { font-family: 'Outfit', sans-serif; font-size: 12px; color: #666; line-height: 1.5; }
+  .tag { display: inline-block; font-size: 9px; padding: 2px 8px; border-radius: 4px; margin-right: 4px; margin-top: 6px; font-family: 'Space Mono', monospace; }
+</style>
+</head>
+<body>
+
+<h1>StudyMate — Style Directions</h1>
+<p class="subtitle">Click to select. Lucide icons, creative font pairings, bold color choices.</p>
+
+<div class="grid">
+
+  <!-- OPTION D: Editorial Warmth -->
+  <div class="card" onclick="select(this, 'D')" id="card-d">
+    <div class="card-preview">
+      <div style="display: flex; height: 300px; overflow: hidden;">
+        <!-- Sidebar -->
+        <div style="width: 220px; background: #0c0b0a; padding: 20px; display: flex; flex-direction: column; gap: 14px; border-right: 1px solid #1d1b18;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #e8a849, #d4782f); border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+              <i data-lucide="book-open" style="width: 14px; height: 14px; color: #0c0b0a;"></i>
+            </div>
+            <span style="font-family: 'Instrument Serif', serif; font-size: 17px; color: #f0ece4; font-style: italic;">StudyMate</span>
+          </div>
+          <div style="background: linear-gradient(135deg, #e8a849, #d4782f); color: #0c0b0a; padding: 9px 14px; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 6px; justify-content: center;">
+            <i data-lucide="plus" style="width: 13px; height: 13px;"></i>
+            New Chat
+          </div>
+          <div style="margin-top: 4px;">
+            <div style="font-family: 'Outfit', sans-serif; color: #4a4540; font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">Library</div>
+            <div style="font-family: 'Outfit', sans-serif; padding: 7px 10px; border-radius: 6px; color: #e8a849; background: #e8a84912; font-size: 12px; display: flex; align-items: center; gap: 7px; border-left: 2px solid #e8a849;">
+              <i data-lucide="library" style="width: 13px; height: 13px;"></i> Books
+            </div>
+          </div>
+          <div style="border-top: 1px solid #1d1b18; padding-top: 10px; flex: 1;">
+            <div style="font-family: 'Outfit', sans-serif; color: #4a4540; font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">Recent</div>
+            <div style="font-family: 'Outfit', sans-serif; padding: 6px 10px; border-radius: 5px; color: #8a8078; font-size: 11px; margin-bottom: 3px; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="message-square" style="width: 11px; height: 11px; opacity: 0.5;"></i> Quadratic formula
+            </div>
+            <div style="font-family: 'Outfit', sans-serif; padding: 6px 10px; border-radius: 5px; color: #8a8078; font-size: 11px; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="message-square" style="width: 11px; height: 11px; opacity: 0.5;"></i> Newton's laws
+            </div>
+          </div>
+        </div>
+        <!-- Main -->
+        <div style="flex: 1; background: #110f0d; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px;">
+          <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #e8a84920, #d4782f10); border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid #e8a84925;">
+            <i data-lucide="sparkles" style="width: 22px; height: 22px; color: #e8a849;"></i>
+          </div>
+          <div style="font-family: 'Instrument Serif', serif; font-size: 22px; color: #f0ece4; font-style: italic;">What shall we explore?</div>
+          <div style="font-family: 'Outfit', sans-serif; color: #4a4540; font-size: 12px;">Your books hold the answers</div>
+          <div style="margin-top: 12px; width: 75%; background: #18150f; border: 1px solid #2a2520; border-radius: 12px; padding: 13px 16px; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="search" style="width: 14px; height: 14px; color: #4a4540;"></i>
+            <span style="flex: 1; color: #4a4540; font-family: 'Outfit', sans-serif; font-size: 12px;">Ask a question...</span>
+            <div style="background: linear-gradient(135deg, #e8a849, #d4782f); padding: 5px 10px; border-radius: 6px; display: flex; align-items: center;">
+              <i data-lucide="arrow-right" style="width: 12px; height: 12px; color: #0c0b0a;"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-info">
+      <h3>D: Editorial Warmth</h3>
+      <p>Instrument Serif headlines + Outfit body. Amber-gold gradient accent on deep espresso darks. Feels like a premium reading app.</p>
+      <div>
+        <span class="tag" style="background: #e8a84920; color: #e8a849;">Instrument Serif</span>
+        <span class="tag" style="background: #e8a84920; color: #e8a849;">Outfit</span>
+        <span class="tag" style="background: linear-gradient(135deg, #e8a84940, #d4782f40); color: #e8a849;">Amber Gold</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION E: Neon Scholar -->
+  <div class="card" onclick="select(this, 'E')" id="card-e">
+    <div class="card-preview">
+      <div style="display: flex; height: 300px; overflow: hidden;">
+        <!-- Sidebar -->
+        <div style="width: 220px; background: #08090d; padding: 20px; display: flex; flex-direction: column; gap: 14px; border-right: 1px solid #141825;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #06b6d4, #8b5cf6); border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+              <i data-lucide="graduation-cap" style="width: 14px; height: 14px; color: #fff;"></i>
+            </div>
+            <span style="font-family: 'Sora', sans-serif; font-size: 15px; color: #f0f0f8; font-weight: 700; letter-spacing: -0.5px;">StudyMate</span>
+          </div>
+          <div style="background: linear-gradient(135deg, #06b6d4, #8b5cf6); color: #fff; padding: 9px 14px; border-radius: 8px; font-family: 'Sora', sans-serif; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 6px; justify-content: center;">
+            <i data-lucide="plus" style="width: 13px; height: 13px;"></i>
+            New Chat
+          </div>
+          <div style="margin-top: 4px;">
+            <div style="font-family: 'Sora', sans-serif; color: #3a3d52; font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">Library</div>
+            <div style="font-family: 'Sora', sans-serif; padding: 7px 10px; border-radius: 6px; color: #06b6d4; background: #06b6d412; font-size: 12px; display: flex; align-items: center; gap: 7px; border-left: 2px solid #06b6d4;">
+              <i data-lucide="library" style="width: 13px; height: 13px;"></i> Books
+            </div>
+          </div>
+          <div style="border-top: 1px solid #141825; padding-top: 10px; flex: 1;">
+            <div style="font-family: 'Sora', sans-serif; color: #3a3d52; font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">Recent</div>
+            <div style="font-family: 'Sora', sans-serif; padding: 6px 10px; border-radius: 5px; color: #6a6d82; font-size: 11px; margin-bottom: 3px; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="message-square" style="width: 11px; height: 11px; opacity: 0.5;"></i> Quadratic formula
+            </div>
+            <div style="font-family: 'Sora', sans-serif; padding: 6px 10px; border-radius: 5px; color: #6a6d82; font-size: 11px; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="message-square" style="width: 11px; height: 11px; opacity: 0.5;"></i> Newton's laws
+            </div>
+          </div>
+        </div>
+        <!-- Main -->
+        <div style="flex: 1; background: #0a0b10; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; position: relative; overflow: hidden;">
+          <div style="position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, #06b6d408 0%, transparent 70%); top: -50px; right: -50px;"></div>
+          <div style="position: absolute; width: 200px; height: 200px; background: radial-gradient(circle, #8b5cf608 0%, transparent 70%); bottom: -30px; left: -30px;"></div>
+          <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #06b6d420, #8b5cf620); border-radius: 12px; display: flex; align-items: center; justify-content: center; border: 1px solid #06b6d425; position: relative;">
+            <i data-lucide="brain" style="width: 22px; height: 22px; color: #06b6d4;"></i>
+          </div>
+          <div style="font-family: 'Sora', sans-serif; font-size: 20px; color: #f0f0f8; font-weight: 600; letter-spacing: -0.5px; position: relative;">Ready to learn something new?</div>
+          <div style="font-family: 'Crimson Pro', serif; color: #4a4d62; font-size: 14px; font-style: italic; position: relative;">Knowledge from your library, instantly</div>
+          <div style="margin-top: 12px; width: 75%; background: #10111a; border: 1px solid #1a1d2e; border-radius: 12px; padding: 13px 16px; display: flex; align-items: center; gap: 8px; position: relative;">
+            <i data-lucide="search" style="width: 14px; height: 14px; color: #3a3d52;"></i>
+            <span style="flex: 1; color: #3a3d52; font-family: 'Sora', sans-serif; font-size: 12px;">Ask a question...</span>
+            <div style="background: linear-gradient(135deg, #06b6d4, #8b5cf6); padding: 5px 10px; border-radius: 6px; display: flex; align-items: center;">
+              <i data-lucide="arrow-right" style="width: 12px; height: 12px; color: #fff;"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-info">
+      <h3>E: Neon Scholar</h3>
+      <p>Sora headings + Crimson Pro accents. Cyan-to-violet gradient with subtle radial glows. Futuristic study vibes, high energy.</p>
+      <div>
+        <span class="tag" style="background: #06b6d420; color: #06b6d4;">Sora</span>
+        <span class="tag" style="background: #8b5cf620; color: #8b5cf6;">Crimson Pro</span>
+        <span class="tag" style="background: linear-gradient(135deg, #06b6d440, #8b5cf640); color: #06b6d4;">Cyan → Violet</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION F: Minimal Ink -->
+  <div class="card" onclick="select(this, 'F')" id="card-f">
+    <div class="card-preview">
+      <div style="display: flex; height: 300px; overflow: hidden;">
+        <!-- Sidebar -->
+        <div style="width: 220px; background: #0a0a0a; padding: 20px; display: flex; flex-direction: column; gap: 14px; border-right: 1px solid #171717;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 28px; height: 28px; background: #e4e4e4; border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+              <i data-lucide="book-marked" style="width: 14px; height: 14px; color: #0a0a0a;"></i>
+            </div>
+            <span style="font-family: 'Archivo', sans-serif; font-size: 15px; color: #e4e4e4; font-weight: 800; letter-spacing: -0.5px; text-transform: uppercase;">Study<span style="color: #22c55e;">Mate</span></span>
+          </div>
+          <div style="background: #e4e4e4; color: #0a0a0a; padding: 9px 14px; border-radius: 6px; font-family: 'Archivo', sans-serif; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 6px; justify-content: center;">
+            <i data-lucide="plus" style="width: 13px; height: 13px;"></i>
+            NEW CHAT
+          </div>
+          <div style="margin-top: 4px;">
+            <div style="font-family: 'Space Mono', monospace; color: #333; font-size: 9px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px;">Library</div>
+            <div style="font-family: 'Archivo', sans-serif; padding: 7px 10px; border-radius: 4px; color: #22c55e; background: #22c55e10; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 7px; border-left: 2px solid #22c55e;">
+              <i data-lucide="library" style="width: 13px; height: 13px;"></i> Books
+            </div>
+          </div>
+          <div style="border-top: 1px solid #171717; padding-top: 10px; flex: 1;">
+            <div style="font-family: 'Space Mono', monospace; color: #333; font-size: 9px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px;">Recent</div>
+            <div style="font-family: 'Archivo', sans-serif; padding: 6px 10px; border-radius: 4px; color: #555; font-size: 11px; margin-bottom: 3px; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="message-square" style="width: 11px; height: 11px; opacity: 0.4;"></i> Quadratic formula
+            </div>
+            <div style="font-family: 'Archivo', sans-serif; padding: 6px 10px; border-radius: 4px; color: #555; font-size: 11px; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="message-square" style="width: 11px; height: 11px; opacity: 0.4;"></i> Newton's laws
+            </div>
+          </div>
+        </div>
+        <!-- Main -->
+        <div style="flex: 1; background: #0e0e0e; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px;">
+          <div style="font-family: 'Archivo', sans-serif; font-size: 28px; color: #e4e4e4; font-weight: 900; letter-spacing: -1px; text-transform: uppercase;">Learn.</div>
+          <div style="font-family: 'Source Serif 4', serif; color: #555; font-size: 14px; font-weight: 300;">Answers from your books, instantly.</div>
+          <div style="margin-top: 16px; width: 70%; background: #141414; border: 1px solid #222; border-radius: 8px; padding: 13px 16px; display: flex; align-items: center; gap: 8px;">
+            <i data-lucide="terminal" style="width: 14px; height: 14px; color: #22c55e;"></i>
+            <span style="flex: 1; color: #444; font-family: 'Space Mono', monospace; font-size: 11px;">type your question_</span>
+            <div style="background: #e4e4e4; padding: 5px 10px; border-radius: 4px; display: flex; align-items: center;">
+              <i data-lucide="arrow-right" style="width: 12px; height: 12px; color: #0a0a0a;"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-info">
+      <h3>F: Minimal Ink</h3>
+      <p>Archivo Black headlines + Source Serif body + Space Mono labels. High contrast black/white with a single green accent. Brutalist-editorial hybrid.</p>
+      <div>
+        <span class="tag" style="background: #e4e4e420; color: #e4e4e4;">Archivo</span>
+        <span class="tag" style="background: #22c55e20; color: #22c55e;">Source Serif</span>
+        <span class="tag" style="background: #33333380; color: #888;">Space Mono</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- OPTION G: Soft Focus -->
+  <div class="card" onclick="select(this, 'G')" id="card-g">
+    <div class="card-preview">
+      <div style="display: flex; height: 300px; overflow: hidden;">
+        <!-- Sidebar -->
+        <div style="width: 220px; background: #0f1117; padding: 20px; display: flex; flex-direction: column; gap: 14px; border-right: 1px solid #1a1d28;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 28px; height: 28px; background: linear-gradient(135deg, #f472b6, #fb923c); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+              <i data-lucide="flame" style="width: 14px; height: 14px; color: #fff;"></i>
+            </div>
+            <span style="font-family: 'Playfair Display', serif; font-size: 16px; color: #f0eef5; font-weight: 500;">StudyMate</span>
+          </div>
+          <div style="background: linear-gradient(135deg, #f472b6, #fb923c); color: #fff; padding: 9px 14px; border-radius: 10px; font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 6px; justify-content: center;">
+            <i data-lucide="plus" style="width: 13px; height: 13px;"></i>
+            New Chat
+          </div>
+          <div style="margin-top: 4px;">
+            <div style="font-family: 'Outfit', sans-serif; color: #3d3f50; font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">Library</div>
+            <div style="font-family: 'Outfit', sans-serif; padding: 7px 10px; border-radius: 8px; color: #f472b6; background: #f472b612; font-size: 12px; display: flex; align-items: center; gap: 7px; border-left: 2px solid #f472b6;">
+              <i data-lucide="library" style="width: 13px; height: 13px;"></i> Books
+            </div>
+          </div>
+          <div style="border-top: 1px solid #1a1d28; padding-top: 10px; flex: 1;">
+            <div style="font-family: 'Outfit', sans-serif; color: #3d3f50; font-size: 9px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px;">Recent</div>
+            <div style="font-family: 'Outfit', sans-serif; padding: 6px 10px; border-radius: 6px; color: #6a6d82; font-size: 11px; margin-bottom: 3px; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="message-square" style="width: 11px; height: 11px; opacity: 0.4;"></i> Quadratic formula
+            </div>
+            <div style="font-family: 'Outfit', sans-serif; padding: 6px 10px; border-radius: 6px; color: #6a6d82; font-size: 11px; display: flex; align-items: center; gap: 6px;">
+              <i data-lucide="message-square" style="width: 11px; height: 11px; opacity: 0.4;"></i> Newton's laws
+            </div>
+          </div>
+        </div>
+        <!-- Main -->
+        <div style="flex: 1; background: #0c0e14; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 10px; position: relative; overflow: hidden;">
+          <div style="position: absolute; width: 400px; height: 400px; background: radial-gradient(circle, #f472b606 0%, transparent 60%); top: -100px; left: 50%; transform: translateX(-50%);"></div>
+          <div style="width: 52px; height: 52px; background: linear-gradient(135deg, #f472b615, #fb923c15); border-radius: 14px; display: flex; align-items: center; justify-content: center; border: 1px solid #f472b620; position: relative;">
+            <i data-lucide="sparkles" style="width: 24px; height: 24px; color: #f472b6;"></i>
+          </div>
+          <div style="font-family: 'Playfair Display', serif; font-size: 22px; color: #f0eef5; font-weight: 500; position: relative;">What's on your mind?</div>
+          <div style="font-family: 'Outfit', sans-serif; color: #4a4d62; font-size: 12px; font-weight: 300; position: relative;">I'll search your books for the best answers</div>
+          <div style="margin-top: 14px; width: 75%; background: #12141c; border: 1px solid #1e2030; border-radius: 14px; padding: 13px 16px; display: flex; align-items: center; gap: 8px; position: relative;">
+            <i data-lucide="search" style="width: 14px; height: 14px; color: #3d3f50;"></i>
+            <span style="flex: 1; color: #3d3f50; font-family: 'Outfit', sans-serif; font-size: 12px;">Ask a question...</span>
+            <div style="background: linear-gradient(135deg, #f472b6, #fb923c); padding: 5px 10px; border-radius: 8px; display: flex; align-items: center;">
+              <i data-lucide="arrow-right" style="width: 12px; height: 12px; color: #fff;"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-info">
+      <h3>G: Sunset Scholar</h3>
+      <p>Playfair Display headlines + Outfit body. Pink-to-orange gradient accents on deep navy. Warm, inviting, distinctive. Rounded shapes throughout.</p>
+      <div>
+        <span class="tag" style="background: #f472b620; color: #f472b6;">Playfair Display</span>
+        <span class="tag" style="background: #fb923c20; color: #fb923c;">Outfit</span>
+        <span class="tag" style="background: linear-gradient(135deg, #f472b640, #fb923c40); color: #f472b6;">Pink → Orange</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  lucide.createIcons();
+  let selected = null;
+  function select(card, id) {
+    document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selected = id;
+    // Record event
+    if (window.recordSelection) window.recordSelection(id);
+  }
+</script>
+</body>
+</html>
