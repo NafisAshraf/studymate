@@ -18,13 +18,20 @@ function ChatInputInner({ onSend, disabled }: ChatInputProps) {
 
   const [tigerAction, setTigerAction] = useState<TigerAction>("walk");
 
-  // Switch to reading when user types
+  // Switch to reading when user types, or cycle walk/wave when empty
   useEffect(() => {
     if (value.trim().length > 0) {
       setTigerAction("read");
-    } else {
-      setTigerAction("walk");
+      return;
     }
+
+    // Toggle walk -> wave every 3.2 seconds (matching their durationMs)
+    setTigerAction("walk");
+    const interval = setInterval(() => {
+      setTigerAction((prev) => (prev === "walk" ? "wave" : "walk"));
+    }, 3200);
+
+    return () => clearInterval(interval);
   }, [value]);
 
   const handleSubmit = useCallback(() => {

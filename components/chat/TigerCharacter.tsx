@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export type TigerAction = "walk" | "read";
+export type TigerAction = "walk" | "read" | "wave";
 
 interface TigerCharacterProps {
   action: TigerAction;
@@ -19,8 +19,9 @@ const ANIMATION_CONFIGS: Record<TigerAction, {
   width?: number; // Base width of character
   height?: number; // Base height of character
 }> = {
-  walk:  { image: "user_tiger_walk.png", frames: 8, cols: 4, rows: 2, durationMs: 1600, width: 64, height: 70 },
-  read:  { image: "user_tiger_read.png",  frames: 8, cols: 4, rows: 2, durationMs: 1200, width: 64, height: 70 },
+  walk: { image: "user_tiger_walk.png", frames: 8, cols: 4, rows: 2, durationMs: 3200, width: 64, height: 70 },
+  read: { image: "user_tiger_read.png", frames: 8, cols: 4, rows: 2, durationMs: 4800, width: 64, height: 70 },
+  wave: { image: "user_tiger_wave.png", frames: 8, cols: 4, rows: 2, durationMs: 3200, width: 64, height: 70 },
 };
 
 export function TigerCharacter({ action, className }: TigerCharacterProps) {
@@ -30,7 +31,7 @@ export function TigerCharacter({ action, className }: TigerCharacterProps) {
   useEffect(() => {
     setFrame(0); // Reset frame on action change
     const interval = config.durationMs / config.frames;
-    
+
     let isMounted = true;
     const timer = setInterval(() => {
       if (!isMounted) return;
@@ -51,7 +52,7 @@ export function TigerCharacter({ action, className }: TigerCharacterProps) {
 
   const col = frame % config.cols;
   const row = Math.floor(frame / config.cols);
-  
+
   // Percentages are (current_index / max_index) * 100
   const bgPosX = config.cols > 1 ? (col / (config.cols - 1)) * 100 : 0;
   const bgPosY = config.rows > 1 ? (row / (config.rows - 1)) * 100 : 0;
