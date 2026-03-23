@@ -11,7 +11,15 @@
       "Bash(xargs -r kill -9)",
       "mcp__Claude_Preview__preview_start",
       "Bash(npx tsc:*)",
-      "Bash(xargs kill:*)"
+      "Bash(xargs kill:*)",
+      "Bash(python3 -m venv venv)",
+      "Bash(source venv/bin/activate)",
+      "Bash(pip3 install:*)",
+      "Read(//usr/local/bin/**)",
+      "Read(//opt/homebrew/bin/**)",
+      "Bash(/opt/homebrew/bin/python3.13 -m venv venv --clear)",
+      "Bash(python3 scan_book.py)",
+      "Bash(kill 26589 50158)"
     ]
   }
 }

@@ -25,4 +25,5 @@ export interface ParsedBook {
   pageCount: number;
   sections: ParsedSection[];
   chunks: ParsedChunk[];
+  imageFilenames: string[];
 }

@@ -4,6 +4,7 @@ import { Check, Loader2, AlertCircle } from "lucide-react";
 
 type Step =
   | "parsing"
+  | "uploading_images"
   | "uploading_sections"
   | "uploading_chunks"
   | "embedding"
@@ -12,6 +13,7 @@ type Step =
 
 const STEPS: { key: Step; label: string }[] = [
   { key: "parsing", label: "Parsing document" },
+  { key: "uploading_images", label: "Uploading images" },
   { key: "uploading_sections", label: "Uploading sections" },
   { key: "uploading_chunks", label: "Uploading chunks" },
   { key: "embedding", label: "Generating embeddings" },
@@ -24,7 +26,6 @@ function getStepState(
 ): "completed" | "active" | "pending" {
   if (currentStep === "error") {
     const currentIndex = STEPS.findIndex((s) => s.key === stepKey);
-    // Mark everything before error as completed, nothing as active
     return currentIndex < STEPS.length ? "pending" : "pending";
   }
 
@@ -47,6 +48,10 @@ export function BookUploadProgress({
   progress,
   errorMessage,
 }: BookUploadProgressProps) {
+  const showProgressBar =
+    (currentStep === "embedding" || currentStep === "uploading_images") &&
+    progress;
+
   return (
     <div className="space-y-3">
       {STEPS.map((step) => {
@@ -88,7 +93,7 @@ export function BookUploadProgress({
         );
       })}
 
-      {currentStep === "embedding" && progress && (
+      {showProgressBar && (
         <div className="ml-8 mt-1">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[11px] font-[family-name:var(--font-body)] text-text-secondary">

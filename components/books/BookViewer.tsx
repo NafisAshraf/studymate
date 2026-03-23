@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
@@ -11,6 +12,14 @@ interface BookViewerProps {
 
 export function BookViewer({ bookId }: BookViewerProps) {
   const rootSections = useQuery(api.sections.rootSections, { bookId });
+  const bookImages = useQuery(api.bookImages.byBook, { bookId });
+
+  const imageUrlMap = useMemo(() => {
+    if (!bookImages) return {};
+    return Object.fromEntries(
+      bookImages.map((img) => [img.filename, img.url])
+    );
+  }, [bookImages]);
 
   if (rootSections === undefined) {
     return (
@@ -33,7 +42,12 @@ export function BookViewer({ bookId }: BookViewerProps) {
   return (
     <div className="flex flex-col gap-1">
       {rootSections.map((section: Doc<"sections">) => (
-        <SectionNode key={section._id} sectionId={section._id} level={0} />
+        <SectionNode
+          key={section._id}
+          sectionId={section._id}
+          level={0}
+          imageUrlMap={imageUrlMap}
+        />
       ))}
     </div>
   );

@@ -1,11 +1,12 @@
 "use client";
 
 import { X, BookOpen, ChevronRight } from "lucide-react";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
 import type { Citation } from "./ChatView";
+import { rewriteImageSrcs } from "@/lib/images/rewriteImageUrls";
 
 interface CitationSidebarProps {
   citations: Citation[];
@@ -145,6 +146,16 @@ function SectionOverlay({
 }: SectionOverlayProps) {
   const section = useQuery(api.sections.get, { id: sectionId });
   const chunks = useQuery(api.chunks.bySectionOrdered, { sectionId });
+  const bookImages = useQuery(
+    api.bookImages.byBook,
+    section ? { bookId: section.bookId } : "skip"
+  );
+  const imageUrlMap = useMemo(() => {
+    if (!bookImages) return {};
+    return Object.fromEntries(
+      bookImages.map((img) => [img.filename, img.url])
+    );
+  }, [bookImages]);
   const highlightRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -218,7 +229,9 @@ function SectionOverlay({
                   >
                     <div
                       className="text-[13px] font-[family-name:var(--font-body)] text-text-primary leading-relaxed prose-studymate"
-                      dangerouslySetInnerHTML={{ __html: chunk.html }}
+                      dangerouslySetInnerHTML={{
+                        __html: rewriteImageSrcs(chunk.html, imageUrlMap),
+                      }}
                     />
                   </div>
                 );

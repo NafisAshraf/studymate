@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query, mutation } from "./_generated/server";
+import { internal } from "./_generated/api";
 
 export const list = query({
   args: {},
@@ -68,6 +69,11 @@ export const rename = mutation({
 export const remove = mutation({
   args: { id: v.id("books") },
   handler: async (ctx, args) => {
+    // Schedule image cleanup (paginated internal mutation)
+    await ctx.scheduler.runAfter(0, internal.bookImages.deleteByBook, {
+      bookId: args.id,
+    });
+
     // Delete all chunks for this book (paginated to handle large books)
     let hasMore = true;
     while (hasMore) {

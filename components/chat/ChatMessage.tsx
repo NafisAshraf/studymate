@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
@@ -15,8 +16,24 @@ interface ChatMessageProps {
   citationChunkIds?: Id<"chunks">[];
   isStreaming?: boolean;
   streamCitations?: Citation[];
+  streamImageMap?: Record<string, string>;
   onCitationClick: (index: number, citations: Citation[]) => void;
   onCitationHover?: (index: number | null, citations: Citation[]) => void;
+}
+
+/**
+ * Replace img:FILENAME references with real Convex URLs before ReactMarkdown
+ * processes them. react-markdown v10 strips unknown URL schemes (like img:),
+ * so we must resolve to https:// URLs first.
+ */
+function resolveImageUrls(content: string, imageMap: Record<string, string>): string {
+  if (Object.keys(imageMap).length === 0) return content;
+  return content.replace(/!\[([\s\S]*?)\]\(img:([^)\s]+)\)/g, (_, alt, filename) => {
+    const url = imageMap[filename];
+    if (!url) return "";
+    const singleLineAlt = alt.replace(/\s+/g, " ").trim();
+    return `![${singleLineAlt}](${url})`;
+  });
 }
 
 export function ChatMessage({
@@ -25,6 +42,7 @@ export function ChatMessage({
   citationChunkIds,
   isStreaming,
   streamCitations,
+  streamImageMap,
   onCitationClick,
   onCitationHover,
 }: ChatMessageProps) {
@@ -49,6 +67,24 @@ export function ChatMessage({
         }))
       : []);
 
+  // Derive bookIds from citation chunks for image resolution (persisted messages)
+  const bookIds = useMemo(() => {
+    if (streamImageMap || !chunks || chunks.length === 0) return [];
+    const ids = [...new Set(chunks.map((c: Doc<"chunks">) => c.bookId))];
+    return ids;
+  }, [chunks, streamImageMap]);
+
+  const bookImages = useQuery(
+    api.bookImages.byBooks,
+    bookIds.length > 0 ? { bookIds } : "skip"
+  );
+
+  const imageMap = useMemo(() => {
+    if (streamImageMap && Object.keys(streamImageMap).length > 0) return streamImageMap;
+    if (!bookImages || bookImages.length === 0) return {};
+    return Object.fromEntries(bookImages.map((img: { filename: string; url: string }) => [img.filename, img.url]));
+  }, [streamImageMap, bookImages]);
+
   // Build a set of valid citation indexes for this message
   const validIndexes = new Set(messageCitations.map((c) => c.index));
 
@@ -70,6 +106,16 @@ export function ChatMessage({
             remarkPlugins={[remarkMath]}
             rehypePlugins={[rehypeKatex]}
             components={{
+              img: ({ src, alt }) => {
+                if (!src) return null;
+                return (
+                  <img
+                    src={src}
+                    alt={alt || ""}
+                    className="rounded-lg max-w-full my-2"
+                  />
+                );
+              },
               p: ({ children }) => {
                 return (
                   <p>
@@ -98,7 +144,7 @@ export function ChatMessage({
               },
             }}
           >
-            {content}
+            {resolveImageUrls(content, imageMap)}
           </ReactMarkdown>
         </div>
         {isStreaming && (
@@ -161,7 +207,6 @@ function processTextWithCitations(
     const match = part.match(/^\[(\d+)\]$/);
     if (match) {
       const index = parseInt(match[1]);
-      // Only render as a citation badge if it matches a real citation
       if (validIndexes.has(index)) {
         return (
           <CitationBadge
@@ -173,7 +218,6 @@ function processTextWithCitations(
           />
         );
       }
-      // Not a real citation — render as plain text
       return part;
     }
     return part;

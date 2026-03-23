@@ -8,6 +8,7 @@
  * @module
  */
 
+import type * as bookImages from "../bookImages.js";
 import type * as books from "../books.js";
 import type * as chatSessions from "../chatSessions.js";
 import type * as chunks from "../chunks.js";
@@ -21,6 +22,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  bookImages: typeof bookImages;
   books: typeof books;
   chatSessions: typeof chatSessions;
   chunks: typeof chunks;

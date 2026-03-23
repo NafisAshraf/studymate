@@ -9,9 +9,10 @@ import { ContentBlock } from "./ContentBlock";
 interface SectionNodeProps {
   sectionId: Id<"sections">;
   level: number;
+  imageUrlMap: Record<string, string>;
 }
 
-export function SectionNode({ sectionId, level }: SectionNodeProps) {
+export function SectionNode({ sectionId, level, imageUrlMap }: SectionNodeProps) {
   const [isOpen, setIsOpen] = useState(false);
   const section = useQuery(api.sections.get, { id: sectionId });
   const children = useQuery(
@@ -59,6 +60,7 @@ export function SectionNode({ sectionId, level }: SectionNodeProps) {
                 key={child._id}
                 sectionId={child._id}
                 level={level + 1}
+                imageUrlMap={imageUrlMap}
               />
             ))}
 
@@ -70,7 +72,11 @@ export function SectionNode({ sectionId, level }: SectionNodeProps) {
                 style={{ paddingLeft: `${(level + 1) * 20 + 12}px` }}
                 className="py-2 pr-3"
               >
-                <ContentBlock html={chunk.html} blockType={chunk.blockType} />
+                <ContentBlock
+                  html={chunk.html}
+                  blockType={chunk.blockType}
+                  imageUrlMap={imageUrlMap}
+                />
               </div>
             ))}
         </div>

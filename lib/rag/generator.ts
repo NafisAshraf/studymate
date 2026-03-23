@@ -17,7 +17,8 @@ function stripBracketNumbers(text: string): string {
 export async function* streamAnswer(
   query: string,
   sections: AssembledSection[],
-  conversationHistory: Message[]
+  conversationHistory: Message[],
+  imageFilenames?: string[]
 ): AsyncGenerator<string> {
   const numSources = sections.length;
 
@@ -28,6 +29,10 @@ export async function* streamAnswer(
     )
     .join("\n\n");
 
+  const imageRules = imageFilenames && imageFilenames.length > 0
+    ? `\n- Sources may contain images marked as [IMAGE: "description" | file: FILENAME]. If an image is directly relevant to your answer, include it on its own line using EXACTLY this syntax: ![short label](img:FILENAME) — use a brief 1-5 word alt label (no long descriptions). The "img:" prefix is required. Example: ![tree diagram](img:abc123_img.jpg)\n- Only reference images that exist in the sources. Do not invent image references.`
+    : "";
+
   const systemPrompt = `You are StudyMate, an expert educational assistant. Answer the student's question using ONLY the provided sources. Be thorough, clear, and educational.
 
 Rules:
@@ -37,7 +42,7 @@ Rules:
 - If the sources don't contain enough information to answer, say so clearly.
 - Use proper mathematical notation with LaTeX when needed (wrap in $ for inline, $$ for display).
 - Be concise but thorough. Structure your answer with clear paragraphs.
-- NEVER invent citation numbers outside the range [1]-[${numSources}].
+- NEVER invent citation numbers outside the range [1]-[${numSources}].${imageRules}
 
 Sources:
 ${sourcesText}`;

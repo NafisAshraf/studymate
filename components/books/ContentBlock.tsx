@@ -3,10 +3,12 @@
 import ReactMarkdown from "react-markdown";
 import remarkMath from "remark-math";
 import rehypeKatex from "rehype-katex";
+import { rewriteImageSrcs } from "@/lib/images/rewriteImageUrls";
 
 interface ContentBlockProps {
   html: string;
   blockType: string;
+  imageUrlMap?: Record<string, string>;
 }
 
 /**
@@ -51,11 +53,16 @@ function convertHtmlToMarkdown(html: string): string {
   return content;
 }
 
-export function ContentBlock({ html, blockType }: ContentBlockProps) {
+export function ContentBlock({ html, blockType, imageUrlMap }: ContentBlockProps) {
+  // Rewrite image src attributes with resolved URLs
+  const resolvedHtml = imageUrlMap
+    ? rewriteImageSrcs(html, imageUrlMap)
+    : html;
+
   // For figures/pictures, try to extract and render the image directly
   if (blockType === "Figure" || blockType === "Picture") {
-    const srcMatch = html.match(/src=["']([^"']+)["']/);
-    const altMatch = html.match(/alt=["']([^"']*?)["']/);
+    const srcMatch = resolvedHtml.match(/src=["']([^"']+)["']/);
+    const altMatch = resolvedHtml.match(/alt=["']([^"']*?)["']/);
     if (srcMatch) {
       return (
         <div className="my-2">
@@ -70,7 +77,7 @@ export function ContentBlock({ html, blockType }: ContentBlockProps) {
     }
   }
 
-  const markdown = convertHtmlToMarkdown(html);
+  const markdown = convertHtmlToMarkdown(resolvedHtml);
 
   return (
     <div className="prose-studymate">

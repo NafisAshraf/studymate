@@ -113,6 +113,13 @@ interface DatalabJson {
   };
 }
 
+interface DatalabApiResponse {
+  json: DatalabJson;
+  images: Record<string, string>;
+  status: string;
+  [key: string]: unknown;
+}
+
 /**
  * Find the deepest (highest level number) section header ID from a block's
  * section_hierarchy object. Returns the section ID and the level.
@@ -168,7 +175,36 @@ function buildSectionPath(
  * - Book title falls back to filename hint or "Untitled" if no h1 found
  */
 export function parseDatalab(json: unknown, fileNameHint?: string): ParsedBook {
-  const data = json as DatalabJson;
+  let data: DatalabJson;
+  let imageFilenames: string[] = [];
+
+  // Detect API vs playground format
+  const raw = json as Record<string, unknown>;
+  if (raw.json && typeof raw.json === "object") {
+    // API format: document tree under .json, images at top level
+    const apiResponse = json as DatalabApiResponse;
+    data = apiResponse.json;
+    imageFilenames = Object.keys(apiResponse.images || {});
+  } else {
+    // Playground format: document tree directly at root
+    data = json as DatalabJson;
+    // Collect image filenames from block-level images objects
+    if (data.children) {
+      const filenameSet = new Set<string>();
+      for (const page of data.children) {
+        if (!page.children) continue;
+        for (const block of page.children) {
+          if (block.images) {
+            for (const key of Object.keys(block.images)) {
+              filenameSet.add(key);
+            }
+          }
+        }
+      }
+      imageFilenames = Array.from(filenameSet);
+    }
+  }
+
   const sections: ParsedSection[] = [];
   const chunks: ParsedChunk[] = [];
 
@@ -274,8 +310,10 @@ export function parseDatalab(json: unknown, fileNameHint?: string): ParsedBook {
 
       const content = htmlToPlainText(block.html);
 
-      // Skip blocks with empty or near-empty content (e.g. image-only blocks)
-      if (content.length < MIN_CHUNK_CONTENT_LENGTH) continue;
+      // Skip blocks with empty content, but keep image blocks (Figure/Picture)
+      const isImageBlock =
+        block.block_type === "Figure" || block.block_type === "Picture";
+      if (content.length < MIN_CHUNK_CONTENT_LENGTH && !isImageBlock) continue;
 
       const hierarchy = block.section_hierarchy ?? {};
 
@@ -323,5 +361,6 @@ export function parseDatalab(json: unknown, fileNameHint?: string): ParsedBook {
     pageCount: data.children.length,
     sections,
     chunks,
+    imageFilenames,
   };
 }

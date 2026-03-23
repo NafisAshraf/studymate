@@ -58,6 +58,14 @@ export default defineSchema({
       filterFields: ["bookId"],
     }),
 
+  bookImages: defineTable({
+    bookId: v.id("books"),
+    filename: v.string(),
+    storageId: v.id("_storage"),
+  })
+    .index("by_bookId", ["bookId"])
+    .index("by_bookId_and_filename", ["bookId", "filename"]),
+
   chatSessions: defineTable({
     title: v.optional(v.string()),
     createdAt: v.number(),

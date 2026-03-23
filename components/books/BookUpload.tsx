@@ -7,9 +7,11 @@ import { Id } from "@/convex/_generated/dataModel";
 import { parseDatalab } from "@/lib/parsing/parseDatalab";
 import { BookUploadProgress } from "./BookUploadProgress";
 import { X, Upload } from "lucide-react";
+import JSZip from "jszip";
 
 type UploadStep =
   | "parsing"
+  | "uploading_images"
   | "uploading_sections"
   | "uploading_chunks"
   | "embedding"
@@ -35,16 +37,24 @@ export function BookUpload({ onClose }: BookUploadProps) {
   const batchInsertChunks = useMutation(api.chunks.batchInsert);
   const setEmbedding = useMutation(api.chunks.setEmbedding);
   const updateBookStatus = useMutation(api.books.updateStatus);
+  const generateUploadUrl = useMutation(api.bookImages.generateUploadUrl);
+  const createBookImage = useMutation(api.bookImages.create);
 
   const handleUpload = useCallback(
     async (file: File) => {
       try {
-        // Step 1: Parse JSON
+        // Step 1: Extract zip and parse JSON
         setUploadStep("parsing");
         setProgress(null);
 
-        const text = await file.text();
-        const json = JSON.parse(text);
+        const zip = await JSZip.loadAsync(file);
+
+        const resultFile = zip.file("result.json");
+        if (!resultFile) {
+          throw new Error("result.json not found in zip");
+        }
+        const jsonText = await resultFile.async("text");
+        const json = JSON.parse(jsonText);
         const parsed = parseDatalab(json, file.name);
 
         // Step 2: Create book
@@ -55,8 +65,46 @@ export function BookUpload({ onClose }: BookUploadProps) {
           chunkCount: parsed.chunks.length,
         });
 
-        // Step 3: Upload sections in batches
+        // Step 3: Upload images
+        const imageFiles = Object.keys(zip.files).filter(
+          (name) =>
+            /\.(jpg|jpeg|png|gif|webp)$/i.test(name) && !zip.files[name].dir
+        );
+
+        if (imageFiles.length > 0) {
+          setUploadStep("uploading_images");
+          setProgress({ current: 0, total: imageFiles.length });
+
+          const IMAGE_CONCURRENCY = 5;
+          let uploaded = 0;
+
+          for (let i = 0; i < imageFiles.length; i += IMAGE_CONCURRENCY) {
+            const batch = imageFiles.slice(i, i + IMAGE_CONCURRENCY);
+            await Promise.all(
+              batch.map(async (imgName) => {
+                const blob = await zip.file(imgName)!.async("blob");
+                const uploadUrl = await generateUploadUrl();
+                const res = await fetch(uploadUrl, {
+                  method: "POST",
+                  headers: { "Content-Type": blob.type || "image/jpeg" },
+                  body: blob,
+                });
+                const { storageId } = await res.json();
+                await createBookImage({
+                  bookId,
+                  filename: imgName,
+                  storageId,
+                });
+              })
+            );
+            uploaded += batch.length;
+            setProgress({ current: uploaded, total: imageFiles.length });
+          }
+        }
+
+        // Step 4: Upload sections in batches
         setUploadStep("uploading_sections");
+        setProgress(null);
         const datalabIdToSectionId = new Map<string, Id<"sections">>();
         const SECTION_BATCH_SIZE = 100;
 
@@ -81,7 +129,7 @@ export function BookUpload({ onClose }: BookUploadProps) {
           });
         }
 
-        // Step 4: Upload chunks in batches
+        // Step 5: Upload chunks in batches
         setUploadStep("uploading_chunks");
         const CHUNK_BATCH_SIZE = 50;
         const allChunkIds: Id<"chunks">[] = [];
@@ -124,12 +172,12 @@ export function BookUpload({ onClose }: BookUploadProps) {
           allChunkIds.push(...ids);
         }
 
-        // Step 5: Generate embeddings
+        // Step 6: Generate embeddings
         setUploadStep("embedding");
         await updateBookStatus({ id: bookId, status: "embedding" });
 
-        const EMBEDDING_BATCH_SIZE = 10; // Smaller batches to avoid rate limits
-        const INTER_BATCH_DELAY_MS = 500; // Pause between batches
+        const EMBEDDING_BATCH_SIZE = 10;
+        const INTER_BATCH_DELAY_MS = 500;
         const totalChunks = validChunks.length;
         let processedChunks = 0;
         setProgress({ current: 0, total: totalChunks });
@@ -156,7 +204,7 @@ export function BookUpload({ onClose }: BookUploadProps) {
 
           const { embeddings } = await response.json();
 
-          // Save embeddings in parallel (much faster than sequential)
+          // Save embeddings in parallel
           await Promise.all(
             embeddings.map((embedding: number[], j: number) =>
               setEmbedding({
@@ -175,7 +223,7 @@ export function BookUpload({ onClose }: BookUploadProps) {
           }
         }
 
-        // Step 6: Mark as ready
+        // Step 7: Mark as ready
         await updateBookStatus({ id: bookId, status: "ready" });
         setUploadStep("done");
 
@@ -197,15 +245,17 @@ export function BookUpload({ onClose }: BookUploadProps) {
       batchInsertChunks,
       setEmbedding,
       updateBookStatus,
+      generateUploadUrl,
+      createBookImage,
       onClose,
     ]
   );
 
   const handleFile = useCallback(
     (file: File) => {
-      if (!file.name.endsWith(".json")) {
+      if (!file.name.endsWith(".zip")) {
         setUploadStep("error");
-        setErrorMessage("Only .json files are accepted");
+        setErrorMessage("Only .zip files are accepted");
         return;
       }
       handleUpload(file);
@@ -285,7 +335,7 @@ export function BookUpload({ onClose }: BookUploadProps) {
                 className={`w-8 h-8 ${isDragging ? "text-accent" : "text-text-muted"}`}
               />
               <p className="text-text-secondary text-[13px] font-[family-name:var(--font-body)] text-center">
-                Drag and drop a Datalab JSON file here
+                Drag and drop a Datalab zip file here
               </p>
               <p className="text-text-muted text-[11px] font-[family-name:var(--font-body)]">
                 or click to browse
@@ -294,7 +344,7 @@ export function BookUpload({ onClose }: BookUploadProps) {
             <input
               ref={fileInputRef}
               type="file"
-              accept=".json"
+              accept=".zip"
               onChange={handleFileInput}
               className="hidden"
             />

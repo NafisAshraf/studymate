@@ -32,6 +32,7 @@ export function ChatView() {
   const [streamStatus, setStreamStatus] = useState<string | null>(null);
   const [streamError, setStreamError] = useState<string | null>(null);
   const [citations, setCitations] = useState<Citation[]>([]);
+  const [imageMap, setImageMap] = useState<Record<string, string>>({});
   const [activeCitations, setActiveCitations] = useState<Citation[] | null>(
     null
   );
@@ -57,6 +58,7 @@ export function ChatView() {
     setStreamedContent("");
     setStreamError(null);
     setCitations([]);
+    setImageMap({});
     setActiveCitations(null);
     setHighlightedIndex(null);
   }, [sessionParam]);
@@ -86,6 +88,7 @@ export function ChatView() {
       setStreamStatus("hyde");
       setStreamError(null);
       setCitations([]);
+      setImageMap({});
 
       try {
         const response = await fetch("/api/chat", {
@@ -140,6 +143,8 @@ export function ChatView() {
                 } else if (currentEventType === "chunk") {
                   tokenBufferRef.current += parsed.text;
                   setStreamStatus("generating");
+                } else if (currentEventType === "images") {
+                  setImageMap(parsed.imageMap as Record<string, string>);
                 } else if (currentEventType === "citations") {
                   setCitations(parsed.citations);
                 } else if (currentEventType === "done") {
@@ -257,6 +262,7 @@ export function ChatView() {
                         content={streamedContent}
                         isStreaming
                         streamCitations={citations}
+                        streamImageMap={imageMap}
                         onCitationClick={handleCitationClick}
                         onCitationHover={handleCitationHover}
                       />

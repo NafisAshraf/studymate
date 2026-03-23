@@ -14,6 +14,16 @@ import type {
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
+function extractImageFilenames(html: string): string[] {
+  const filenames: string[] = [];
+  const regex = /<img[^>]+src=["']([^"']+)["']/gi;
+  let match;
+  while ((match = regex.exec(html)) !== null) {
+    filenames.push(match[1]);
+  }
+  return filenames;
+}
+
 function sseEvent(event: string, data: Record<string, unknown>): string {
   return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
 }
@@ -112,6 +122,8 @@ export async function POST(req: Request) {
 
         const seenSectionIds = new Set<string>();
         const assembledSections: AssembledSection[] = [];
+        const imageFilenames = new Set<string>();
+        const bookIdsForImages = new Set<string>();
 
         for (const chunk of rerankedChunks) {
           if (seenSectionIds.has(chunk.sectionId)) continue;
@@ -126,9 +138,32 @@ export async function POST(req: Request) {
             }
           );
 
-          const sectionContent = sectionChunks
-            .map((c: { content: string }) => c.content)
-            .join("\n\n");
+          const contentParts: string[] = [];
+          for (const c of sectionChunks as Array<{ content: string; html: string; blockType: string; bookId: string }>) {
+            const filenames = extractImageFilenames(c.html);
+            if (filenames.length > 0) {
+              for (const filename of filenames) {
+                imageFilenames.add(filename);
+                bookIdsForImages.add(c.bookId);
+              }
+              // For image-only blocks, use the full content as description
+              if (c.blockType === "Figure" || c.blockType === "Picture") {
+                contentParts.push(
+                  filenames.map(f => `[IMAGE: "${c.content}" | file: ${f}]`).join("\n\n")
+                );
+              } else {
+                // Text block with embedded images — include content + image refs
+                contentParts.push(c.content);
+                for (const f of filenames) {
+                  contentParts.push(`[IMAGE: file: ${f}]`);
+                }
+              }
+            } else {
+              contentParts.push(c.content);
+            }
+          }
+
+          const sectionContent = contentParts.join("\n\n");
 
           assembledSections.push({
             sectionId: chunk.sectionId,
@@ -137,6 +172,25 @@ export async function POST(req: Request) {
             anchorChunkId: chunk._id,
             page: chunk.page,
           });
+        }
+
+        // 7b. Resolve image URLs
+        const imageMap: Record<string, string> = {};
+        for (const bookId of bookIdsForImages) {
+          const images = await convex.query(api.bookImages.byBook, {
+            bookId: bookId as Id<"books">,
+          });
+          for (const img of images) {
+            if (imageFilenames.has(img.filename)) {
+              imageMap[img.filename] = img.url;
+            }
+          }
+        }
+
+        if (Object.keys(imageMap).length > 0) {
+          controller.enqueue(
+            encoder.encode(sseEvent("images", { imageMap }))
+          );
         }
 
         // 8. Stream answer generation
@@ -153,7 +207,8 @@ export async function POST(req: Request) {
         for await (const token of streamAnswer(
           query,
           assembledSections,
-          history
+          history,
+          Object.keys(imageMap)
         )) {
           fullAnswer += token;
           controller.enqueue(
