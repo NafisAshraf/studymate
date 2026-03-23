@@ -5,6 +5,7 @@ import { generateHyDE } from "@/lib/rag/hyde";
 import { embedText } from "@/lib/rag/embeddings";
 import { rerankChunks } from "@/lib/rag/reranker";
 import { streamAnswer } from "@/lib/rag/generator";
+import { retryWithBackoff } from "@/lib/rag/retry";
 import type {
   RetrievedChunk,
   AssembledSection,
@@ -234,40 +235,49 @@ async function generateTitle(
   assistantMessage: string
 ) {
   try {
-    const response = await fetch(
-      "https://openrouter.ai/api/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
-          messages: [
-            {
-              role: "system",
-              content:
-                "Generate a concise 3-6 word title for this conversation. Return only the title, nothing else.",
+    const data = await retryWithBackoff(
+      async () => {
+        const response = await fetch(
+          "https://openrouter.ai/api/v1/chat/completions",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+              "Content-Type": "application/json",
             },
-            {
-              role: "user",
-              content: `User asked: "${userMessage.slice(0, 200)}"\nAssistant answered: "${assistantMessage.slice(0, 200)}"`,
-            },
-          ],
-          max_tokens: 20,
-        }),
-      }
+            body: JSON.stringify({
+              model: "google/gemini-2.5-flash",
+              messages: [
+                {
+                  role: "system",
+                  content:
+                    "Generate a concise 3-6 word title for this conversation. Return only the title, nothing else.",
+                },
+                {
+                  role: "user",
+                  content: `User asked: "${userMessage.slice(0, 200)}"\nAssistant answered: "${assistantMessage.slice(0, 200)}"`,
+                },
+              ],
+              max_tokens: 20,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          const error = await response.text();
+          throw new Error(`Title generation failed: ${error}`);
+        }
+
+        return response.json();
+      },
+      { label: "Title generation" }
     );
 
-    if (response.ok) {
-      const data = await response.json();
-      const title = data.choices[0].message.content.trim();
-      await convex.mutation(api.chatSessions.updateTitle, {
-        id: sessionId,
-        title,
-      });
-    }
+    const title = data.choices[0].message.content.trim();
+    await convex.mutation(api.chatSessions.updateTitle, {
+      id: sessionId,
+      title,
+    });
   } catch (error) {
     console.error("Title generation failed:", error);
   }

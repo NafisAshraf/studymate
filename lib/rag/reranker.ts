@@ -1,3 +1,4 @@
+import { retryWithBackoff } from "./retry";
 import type { RetrievedChunk } from "./types";
 
 interface RerankResult {
@@ -14,28 +15,34 @@ export async function rerankChunks(
 ): Promise<RetrievedChunk[]> {
   const documents = chunks.map((c) => c.embeddingText);
 
-  const response = await fetch(
-    "https://api.fireworks.ai/inference/v1/rerank",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.FIREWORKS_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "accounts/fireworks/models/qwen3-reranker-8b",
-        query,
-        documents,
-      }),
-    }
+  const data = await retryWithBackoff(
+    async () => {
+      const response = await fetch(
+        "https://api.fireworks.ai/inference/v1/rerank",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${process.env.FIREWORKS_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "accounts/fireworks/models/qwen3-reranker-8b",
+            query,
+            documents,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`Reranking failed: ${error}`);
+      }
+
+      return response.json();
+    },
+    { label: "Reranker" }
   );
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Reranking failed: ${error}`);
-  }
-
-  const data = await response.json();
   const results: RerankResult[] = data.data ?? data.results;
 
   // Sort by relevance score descending

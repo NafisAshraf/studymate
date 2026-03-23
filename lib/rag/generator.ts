@@ -1,3 +1,4 @@
+import { retryWithBackoff } from "./retry";
 import type { AssembledSection } from "./types";
 
 interface Message {
@@ -50,27 +51,34 @@ ${sourcesText}`;
     { role: "user", content: query },
   ];
 
-  const response = await fetch(
-    "https://openrouter.ai/api/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages,
-        stream: true,
-        max_tokens: 2000,
-      }),
-    }
-  );
+  const response = await retryWithBackoff(
+    async () => {
+      const res = await fetch(
+        "https://openrouter.ai/api/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages,
+            stream: true,
+            max_tokens: 2000,
+          }),
+        }
+      );
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Answer generation failed: ${error}`);
-  }
+      if (!res.ok) {
+        const error = await res.text();
+        throw new Error(`Answer generation failed: ${error}`);
+      }
+
+      return res;
+    },
+    { label: "Generator", maxRetries: 2 }
+  );
 
   const reader = response.body?.getReader();
   if (!reader) throw new Error("No response stream");

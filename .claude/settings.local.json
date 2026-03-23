@@ -8,7 +8,10 @@
       "Bash(source .env.local)",
       "Bash(node -e \":*)",
       "Bash(NEXT_PUBLIC_CONVEX_URL=https://reminiscent-kiwi-375.convex.cloud node -e \":*)",
-      "Bash(xargs -r kill -9)"
+      "Bash(xargs -r kill -9)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npx tsc:*)",
+      "Bash(xargs kill:*)"
     ]
   }
 }

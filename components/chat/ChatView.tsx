@@ -37,10 +37,16 @@ export function ChatView() {
   );
   const [highlightedIndex, setHighlightedIndex] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const tokenBufferRef = useRef("");
+  const flushTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const messages = useQuery(
     api.messages.bySession,
     sessionId ? { sessionId } : "skip"
+  );
+  const session = useQuery(
+    api.chatSessions.get,
+    sessionId ? { id: sessionId } : "skip"
   );
   const createSession = useMutation(api.chatSessions.create);
 
@@ -54,6 +60,12 @@ export function ChatView() {
     setActiveCitations(null);
     setHighlightedIndex(null);
   }, [sessionParam]);
+
+  useEffect(() => {
+    return () => {
+      if (flushTimerRef.current) clearInterval(flushTimerRef.current);
+    };
+  }, []);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -89,6 +101,14 @@ export function ChatView() {
 
         if (!reader) throw new Error("No response stream");
 
+        // Start token buffer flush interval for smooth streaming
+        flushTimerRef.current = setInterval(() => {
+          if (tokenBufferRef.current) {
+            setStreamedContent((prev) => prev + tokenBufferRef.current);
+            tokenBufferRef.current = "";
+          }
+        }, 80);
+
         let buffer = "";
         let currentEventType = "";
 
@@ -118,7 +138,7 @@ export function ChatView() {
                 } else if (currentEventType === "status") {
                   setStreamStatus(parsed.step);
                 } else if (currentEventType === "chunk") {
-                  setStreamedContent((prev) => prev + parsed.text);
+                  tokenBufferRef.current += parsed.text;
                   setStreamStatus("generating");
                 } else if (currentEventType === "citations") {
                   setCitations(parsed.citations);
@@ -138,10 +158,17 @@ export function ChatView() {
           error instanceof Error ? error.message : "Connection failed"
         );
       } finally {
+        // Flush any remaining buffered tokens
+        if (tokenBufferRef.current) {
+          setStreamedContent((prev) => prev + tokenBufferRef.current);
+          tokenBufferRef.current = "";
+        }
+        if (flushTimerRef.current) {
+          clearInterval(flushTimerRef.current);
+          flushTimerRef.current = null;
+        }
         setIsStreaming(false);
         setStreamStatus(null);
-        // Don't clear streamedContent — let Convex reactive query take over
-        // once the assistant message is saved
       }
     },
     [sessionId, createSession]
@@ -198,7 +225,16 @@ export function ChatView() {
           </div>
         ) : (
           <>
-            <div className="flex-1 overflow-y-auto px-3 md:px-6 py-4 pt-14 md:pt-4">
+            {session?.title && (
+              <div className="px-3 md:px-6 pt-4 pb-2">
+                <div className="max-w-3xl mx-auto">
+                  <h2 className="font-[family-name:var(--font-display)] text-text-secondary text-[15px] italic truncate">
+                    {session.title}
+                  </h2>
+                </div>
+              </div>
+            )}
+            <div className="flex-1 overflow-y-auto px-3 md:px-6 py-4 pt-4 md:pt-4">
               <div className="max-w-3xl mx-auto space-y-4">
                 {messages?.map((msg: Doc<"messages">) => (
                   <ChatMessage

@@ -1,3 +1,5 @@
+import { retryWithBackoff } from "./retry";
+
 interface Message {
   role: string;
   content: string;
@@ -25,27 +27,33 @@ export async function generateHyDE(
     },
   ];
 
-  const response = await fetch(
-    "https://openrouter.ai/api/v1/chat/completions",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages,
-        max_tokens: 300,
-      }),
-    }
+  const data = await retryWithBackoff(
+    async () => {
+      const response = await fetch(
+        "https://openrouter.ai/api/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "google/gemini-2.5-flash",
+            messages,
+            max_tokens: 300,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(`HyDE generation failed: ${error}`);
+      }
+
+      return response.json();
+    },
+    { label: "HyDE" }
   );
 
-  if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`HyDE generation failed: ${error}`);
-  }
-
-  const data = await response.json();
   return data.choices[0].message.content;
 }
