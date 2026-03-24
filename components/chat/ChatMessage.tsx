@@ -117,6 +117,15 @@ export function ChatMessage({
               stepIndex: s.stepIndex,
               durationMs: s.durationMs,
               data: s.data,
+              provider: s.provider,
+              model: s.model,
+              inputTokens: s.inputTokens,
+              outputTokens: s.outputTokens,
+              totalTokens: s.totalTokens,
+              cost: s.cost,
+              costUnit: s.costUnit,
+              providerRequestId: s.providerRequestId,
+              usageRaw: s.usageRaw,
               status: "complete" as const,
             }))}
             isComplete={true}

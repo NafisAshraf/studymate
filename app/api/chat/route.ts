@@ -9,9 +9,11 @@ import { retryWithBackoff } from "@/lib/rag/retry";
 import { cleanQueryForKeywordSearch } from "@/lib/rag/keywordSearch";
 import { reciprocalRankFusion } from "@/lib/rag/fusion";
 import type {
+  CollectedPipelineStep,
   RetrievedChunk,
   AssembledSection,
   PipelineCitation,
+  StepMetrics,
 } from "@/lib/rag/types";
 
 const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
@@ -37,12 +39,7 @@ export async function POST(req: Request) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        const collectedSteps: Array<{
-          stepIndex: number;
-          stepName: string;
-          durationMs: number;
-          data: string;
-        }> = [];
+        const collectedSteps: CollectedPipelineStep[] = [];
 
         // 1. Save user message
         await convex.mutation(api.messages.send, {
@@ -62,14 +59,20 @@ export async function POST(req: Request) {
 
         // 3. Step 0: Query Rewrite (HyDE)
         const t0 = performance.now();
-        const hydeText = await generateHyDE(query, history);
+        const hydeResult = await generateHyDE(query, history);
+        const hydeText = hydeResult.text;
         const hydeMs = Math.round(performance.now() - t0);
+        const step0Data = {
+          hydeText,
+          llmMetrics: hydeResult.metrics,
+        };
 
         const step0 = {
           stepIndex: 0,
           stepName: "query_rewrite",
           durationMs: hydeMs,
-          data: JSON.stringify({ hydeText }),
+          ...hydeResult.metrics,
+          data: JSON.stringify(step0Data),
         };
         collectedSteps.push(step0);
         controller.enqueue(
@@ -78,7 +81,8 @@ export async function POST(req: Request) {
               step: "query_rewrite",
               stepIndex: 0,
               durationMs: hydeMs,
-              data: { hydeText },
+              ...hydeResult.metrics,
+              data: step0Data,
             })
           )
         );
@@ -160,20 +164,24 @@ export async function POST(req: Request) {
 
         // 5. Step 2: Rerank
         const t2 = performance.now();
-        const rerankedChunks = await rerankChunks(query, searchResults);
+        const { chunks: rerankedChunks, metrics: rerankMetrics } =
+          await rerankChunks(query, searchResults);
         const rerankMs = Math.round(performance.now() - t2);
+        const step2Data = {
+          chunks: rerankedChunks.map((c) => ({
+            sectionPath: c.sectionPath,
+            score: c.score,
+            excerpt: c.content.slice(0, 150),
+          })),
+          llmMetrics: rerankMetrics,
+        };
 
         const step2 = {
           stepIndex: 2,
           stepName: "rerank",
           durationMs: rerankMs,
-          data: JSON.stringify({
-            chunks: rerankedChunks.map((c) => ({
-              sectionPath: c.sectionPath,
-              score: c.score,
-              excerpt: c.content.slice(0, 150),
-            })),
-          }),
+          ...rerankMetrics,
+          data: JSON.stringify(step2Data),
         };
         collectedSteps.push(step2);
         controller.enqueue(
@@ -182,13 +190,8 @@ export async function POST(req: Request) {
               step: "rerank",
               stepIndex: 2,
               durationMs: rerankMs,
-              data: {
-                chunks: rerankedChunks.map((c) => ({
-                  sectionPath: c.sectionPath,
-                  score: c.score,
-                  excerpt: c.content.slice(0, 150),
-                })),
-              },
+              ...rerankMetrics,
+              data: step2Data,
             })
           )
         );
@@ -267,13 +270,23 @@ export async function POST(req: Request) {
 
         // 7. Step 3: Stream answer generation
         const t3 = performance.now();
+        let generateMetrics: StepMetrics = {
+          provider: "openrouter",
+          model: "google/gemini-2.5-flash",
+        };
 
         let fullAnswer = "";
         for await (const token of streamAnswer(
           query,
           assembledSections,
           history,
-          Object.keys(imageMap)
+          Object.keys(imageMap),
+          (metrics) => {
+            generateMetrics = {
+              ...generateMetrics,
+              ...metrics,
+            };
+          }
         )) {
           fullAnswer += token;
           controller.enqueue(
@@ -282,11 +295,16 @@ export async function POST(req: Request) {
         }
 
         const generateMs = Math.round(performance.now() - t3);
+        const step3Data = {
+          totalDurationMs: generateMs,
+          llmMetrics: generateMetrics,
+        };
         const step3 = {
           stepIndex: 3,
           stepName: "generate",
           durationMs: generateMs,
-          data: JSON.stringify({ totalDurationMs: generateMs }),
+          ...generateMetrics,
+          data: JSON.stringify(step3Data),
         };
         collectedSteps.push(step3);
         controller.enqueue(
@@ -295,7 +313,8 @@ export async function POST(req: Request) {
               step: "generate",
               stepIndex: 3,
               durationMs: generateMs,
-              data: { totalDurationMs: generateMs },
+              ...generateMetrics,
+              data: step3Data,
             })
           )
         );

@@ -144,6 +144,15 @@ export function ChatView() {
                     stepIndex: parsed.stepIndex,
                     durationMs: parsed.durationMs,
                     data: JSON.stringify(parsed.data),
+                    provider: parsed.provider,
+                    model: parsed.model,
+                    inputTokens: parsed.inputTokens,
+                    outputTokens: parsed.outputTokens,
+                    totalTokens: parsed.totalTokens,
+                    cost: parsed.cost,
+                    costUnit: parsed.costUnit,
+                    providerRequestId: parsed.providerRequestId,
+                    usageRaw: parsed.usageRaw,
                     status: "complete",
                   };
                   setPipelineSteps((prev) => [...prev, step]);

@@ -1,4 +1,5 @@
 import { retryWithBackoff } from "./retry";
+import type { StepMetrics } from "./types";
 
 interface Message {
   role: string;
@@ -8,7 +9,7 @@ interface Message {
 export async function generateHyDE(
   query: string,
   conversationHistory: Message[]
-): Promise<string> {
+): Promise<{ text: string; metrics: StepMetrics }> {
   const recentHistory = conversationHistory.slice(-6);
 
   const messages = [
@@ -55,5 +56,26 @@ export async function generateHyDE(
     { label: "HyDE" }
   );
 
-  return data.choices[0].message.content;
+  const usage = data.usage;
+  const metrics: StepMetrics = {
+    provider: "openrouter",
+    model: typeof data.model === "string" ? data.model : undefined,
+    inputTokens:
+      typeof usage?.prompt_tokens === "number" ? usage.prompt_tokens : undefined,
+    outputTokens:
+      typeof usage?.completion_tokens === "number"
+        ? usage.completion_tokens
+        : undefined,
+    totalTokens:
+      typeof usage?.total_tokens === "number" ? usage.total_tokens : undefined,
+    cost: typeof usage?.cost === "number" ? usage.cost : undefined,
+    costUnit: usage?.cost != null ? "credits" : undefined,
+    providerRequestId: typeof data.id === "string" ? data.id : undefined,
+    usageRaw: usage ? JSON.stringify(usage) : undefined,
+  };
+
+  return {
+    text: data.choices[0].message.content,
+    metrics,
+  };
 }

@@ -34,6 +34,34 @@ export interface PipelineCitation {
   page: number;
 }
 
+export type PipelineStepName =
+  | "query_rewrite"
+  | "search"
+  | "rerank"
+  | "generate";
+
+export type ProviderName = "openrouter" | "fireworks";
+export type CostUnit = "credits" | "usd" | "unknown";
+
+export interface StepMetrics {
+  provider?: ProviderName;
+  model?: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  totalTokens?: number;
+  cost?: number;
+  costUnit?: CostUnit;
+  providerRequestId?: string;
+  usageRaw?: string;
+}
+
+export interface CollectedPipelineStep extends StepMetrics {
+  stepIndex: number;
+  stepName: PipelineStepName;
+  durationMs: number;
+  data: string;
+}
+
 export interface SSEEvent {
   event: "step_complete" | "chunk" | "images" | "citations" | "done" | "error";
   data: Record<string, unknown>;

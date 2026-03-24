@@ -90,10 +90,29 @@ export default defineSchema({
     messageId: v.id("messages"),
     sessionId: v.id("chatSessions"),
     stepIndex: v.number(),
-    stepName: v.string(),
+    stepName: v.union(
+      v.literal("query_rewrite"),
+      v.literal("search"),
+      v.literal("rerank"),
+      v.literal("generate")
+    ),
     durationMs: v.number(),
+    provider: v.optional(
+      v.union(v.literal("openrouter"), v.literal("fireworks"))
+    ),
+    model: v.optional(v.string()),
+    inputTokens: v.optional(v.number()),
+    outputTokens: v.optional(v.number()),
+    totalTokens: v.optional(v.number()),
+    cost: v.optional(v.number()),
+    costUnit: v.optional(
+      v.union(v.literal("credits"), v.literal("usd"), v.literal("unknown"))
+    ),
+    providerRequestId: v.optional(v.string()),
+    usageRaw: v.optional(v.string()),
     data: v.string(),
   })
     .index("by_messageId", ["messageId"])
-    .index("by_sessionId", ["sessionId"]),
+    .index("by_sessionId", ["sessionId"])
+    .index("by_sessionId_and_stepName", ["sessionId", "stepName"]),
 });

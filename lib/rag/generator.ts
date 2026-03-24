@@ -1,5 +1,6 @@
 import { retryWithBackoff } from "./retry";
 import type { AssembledSection } from "./types";
+import type { StepMetrics } from "./types";
 
 interface Message {
   role: string;
@@ -18,7 +19,8 @@ export async function* streamAnswer(
   query: string,
   sections: AssembledSection[],
   conversationHistory: Message[],
-  imageFilenames?: string[]
+  imageFilenames?: string[],
+  onFinalMetrics?: (metrics: StepMetrics) => void
 ): AsyncGenerator<string> {
   const numSources = sections.length;
 
@@ -90,6 +92,7 @@ ${sourcesText}`;
 
   const decoder = new TextDecoder();
   let buffer = "";
+  let finalMetrics: StepMetrics | null = null;
 
   while (true) {
     const { done, value } = await reader.read();
@@ -102,9 +105,33 @@ ${sourcesText}`;
     for (const line of lines) {
       const trimmed = line.trim();
       if (!trimmed || trimmed === "data: [DONE]") continue;
+      if (trimmed.startsWith(":")) continue;
       if (trimmed.startsWith("data: ")) {
         try {
           const data = JSON.parse(trimmed.slice(6));
+          const usage = data.usage;
+          if (usage) {
+            finalMetrics = {
+              provider: "openrouter",
+              model: typeof data.model === "string" ? data.model : undefined,
+              inputTokens:
+                typeof usage.prompt_tokens === "number"
+                  ? usage.prompt_tokens
+                  : undefined,
+              outputTokens:
+                typeof usage.completion_tokens === "number"
+                  ? usage.completion_tokens
+                  : undefined,
+              totalTokens:
+                typeof usage.total_tokens === "number"
+                  ? usage.total_tokens
+                  : undefined,
+              cost: typeof usage.cost === "number" ? usage.cost : undefined,
+              costUnit: usage.cost != null ? "credits" : undefined,
+              providerRequestId: typeof data.id === "string" ? data.id : undefined,
+              usageRaw: JSON.stringify(usage),
+            };
+          }
           const content = data.choices?.[0]?.delta?.content;
           if (content) {
             yield content;
@@ -114,5 +141,9 @@ ${sourcesText}`;
         }
       }
     }
+  }
+
+  if (finalMetrics && onFinalMetrics) {
+    onFinalMetrics(finalMetrics);
   }
 }
