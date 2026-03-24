@@ -56,6 +56,10 @@ export default defineSchema({
       vectorField: "embedding",
       dimensions: 4096,
       filterFields: ["bookId"],
+    })
+    .searchIndex("search_content", {
+      searchField: "content",
+      filterFields: ["bookId"],
     }),
 
   bookImages: defineTable({

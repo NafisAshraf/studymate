@@ -6,6 +6,8 @@ import { embedText } from "@/lib/rag/embeddings";
 import { rerankChunks } from "@/lib/rag/reranker";
 import { streamAnswer } from "@/lib/rag/generator";
 import { retryWithBackoff } from "@/lib/rag/retry";
+import { cleanQueryForKeywordSearch } from "@/lib/rag/keywordSearch";
+import { reciprocalRankFusion } from "@/lib/rag/fusion";
 import type {
   RetrievedChunk,
   AssembledSection,
@@ -51,38 +53,37 @@ export async function POST(req: Request) {
           content: m.content,
         }));
 
-        // 3. HyDE query rewriting
+        // 3. Hybrid search: keyword + dense retrieval in parallel
         controller.enqueue(
           encoder.encode(
-            sseEvent("status", { step: "hyde", message: "Rewriting query..." })
+            sseEvent("status", { step: "searching", message: "Searching books..." })
           )
         );
-        const hydeText = await generateHyDE(query, history);
 
-        // 4. Embed the HyDE text
-        controller.enqueue(
-          encoder.encode(
-            sseEvent("status", {
-              step: "embedding",
-              message: "Embedding query...",
-            })
-          )
-        );
-        const queryEmbedding = await embedText(hydeText);
+        const [keywordResults, vectorResults] = await Promise.all([
+          // Path A: keyword search (uses original query, no HyDE dependency)
+          (async () => {
+            const cleanedQuery = cleanQueryForKeywordSearch(query);
+            const results = await convex.query(api.chunks.textSearch, {
+              query: cleanedQuery,
+              limit: 20,
+            });
+            return results as RetrievedChunk[];
+          })(),
+          // Path B: dense search (HyDE → embed → vector search)
+          (async () => {
+            const hydeText = await generateHyDE(query, history);
+            const queryEmbedding = await embedText(hydeText);
+            return (await convex.action(api.chunks.vectorSearch, {
+              embedding: queryEmbedding,
+              limit: 20,
+            })) as RetrievedChunk[];
+          })(),
+        ]);
 
-        // 5. Vector search
-        controller.enqueue(
-          encoder.encode(
-            sseEvent("status", {
-              step: "searching",
-              message: "Searching books...",
-            })
-          )
-        );
-        const searchResults = (await convex.action(api.chunks.vectorSearch, {
-          embedding: queryEmbedding,
-          limit: 20,
-        })) as RetrievedChunk[];
+        // 4. RRF fusion + dedup
+        const fusedResults = reciprocalRankFusion(vectorResults, keywordResults);
+        const searchResults = fusedResults.slice(0, 20);
 
         if (searchResults.length === 0) {
           controller.enqueue(
@@ -99,7 +100,7 @@ export async function POST(req: Request) {
           return;
         }
 
-        // 6. Rerank
+        // 5. Rerank
         controller.enqueue(
           encoder.encode(
             sseEvent("status", {
@@ -110,7 +111,7 @@ export async function POST(req: Request) {
         );
         const rerankedChunks = await rerankChunks(query, searchResults);
 
-        // 7. Parent-section assembly
+        // 6. Parent-section assembly
         controller.enqueue(
           encoder.encode(
             sseEvent("status", {
@@ -174,7 +175,7 @@ export async function POST(req: Request) {
           });
         }
 
-        // 7b. Resolve image URLs
+        // 6b. Resolve image URLs
         const imageMap: Record<string, string> = {};
         for (const bookId of bookIdsForImages) {
           const images = await convex.query(api.bookImages.byBook, {
@@ -193,7 +194,7 @@ export async function POST(req: Request) {
           );
         }
 
-        // 8. Stream answer generation
+        // 7. Stream answer generation
         controller.enqueue(
           encoder.encode(
             sseEvent("status", {
@@ -216,7 +217,7 @@ export async function POST(req: Request) {
           );
         }
 
-        // 9. Build citations
+        // 8. Build citations
         const citations: PipelineCitation[] = assembledSections.map(
           (section, i) => ({
             index: i + 1,
@@ -233,7 +234,7 @@ export async function POST(req: Request) {
           encoder.encode(sseEvent("citations", { citations }))
         );
 
-        // 10. Save assistant message
+        // 9. Save assistant message
         const citationChunkIds = assembledSections.map(
           (s) => s.anchorChunkId as Id<"chunks">
         );
@@ -249,7 +250,7 @@ export async function POST(req: Request) {
           encoder.encode(sseEvent("done", { messageId }))
         );
 
-        // 11. Auto-generate title if first exchange
+        // 10. Auto-generate title if first exchange
         if (messages.length <= 1) {
           generateTitle(
             sessionId as Id<"chatSessions">,

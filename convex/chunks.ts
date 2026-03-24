@@ -71,6 +71,28 @@ export const setEmbedding = mutation({
   },
 });
 
+export const textSearch = query({
+  args: {
+    query: v.string(),
+    bookId: v.optional(v.id("books")),
+    limit: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const results = await ctx.db
+      .query("chunks")
+      .withSearchIndex("search_content", (q) => {
+        const search = q.search("content", args.query);
+        return args.bookId ? search.eq("bookId", args.bookId) : search;
+      })
+      .take(args.limit);
+
+    return results.map((chunk, i) => ({
+      ...chunk,
+      score: 1 - i / args.limit,
+    }));
+  },
+});
+
 export const vectorSearch = action({
   args: {
     embedding: v.array(v.float64()),
