@@ -8,11 +8,13 @@ import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
 import { CitationBadge } from "./CitationBadge";
+import { PipelineTimeline } from "./PipelineTimeline";
 import type { Citation } from "./ChatView";
 
 interface ChatMessageProps {
   role: "user" | "assistant";
   content: string;
+  messageId?: Id<"messages">;
   citationChunkIds?: Id<"chunks">[];
   isStreaming?: boolean;
   streamCitations?: Citation[];
@@ -39,6 +41,7 @@ function resolveImageUrls(content: string, imageMap: Record<string, string>): st
 export function ChatMessage({
   role,
   content,
+  messageId,
   citationChunkIds,
   isStreaming,
   streamCitations,
@@ -46,6 +49,12 @@ export function ChatMessage({
   onCitationClick,
   onCitationHover,
 }: ChatMessageProps) {
+  const pipelineStepsData = useQuery(
+    api.pipelineSteps.byMessage,
+    role === "assistant" && messageId && !isStreaming
+      ? { messageId }
+      : "skip"
+  );
   const chunks = useQuery(
     api.chunks.getMany,
     citationChunkIds && citationChunkIds.length > 0
@@ -101,6 +110,19 @@ export function ChatMessage({
   return (
     <div className="flex justify-start">
       <div className="bg-bg-surface border border-border-subtle py-3 px-4 rounded-xl max-w-[85%] text-[13px]">
+        {pipelineStepsData && pipelineStepsData.length > 0 && (
+          <PipelineTimeline
+            steps={pipelineStepsData.map((s) => ({
+              stepName: s.stepName,
+              stepIndex: s.stepIndex,
+              durationMs: s.durationMs,
+              data: s.data,
+              status: "complete" as const,
+            }))}
+            isComplete={true}
+            defaultCollapsed={true}
+          />
+        )}
         <div className="prose-studymate">
           <ReactMarkdown
             remarkPlugins={[remarkMath]}

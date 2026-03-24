@@ -37,6 +37,13 @@ export async function POST(req: Request) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
+        const collectedSteps: Array<{
+          stepIndex: number;
+          stepName: string;
+          durationMs: number;
+          data: string;
+        }> = [];
+
         // 1. Save user message
         await convex.mutation(api.messages.send, {
           sessionId: sessionId as Id<"chatSessions">,
@@ -53,15 +60,33 @@ export async function POST(req: Request) {
           content: m.content,
         }));
 
-        // 3. Hybrid search: keyword + dense retrieval in parallel
+        // 3. Step 0: Query Rewrite (HyDE)
+        const t0 = performance.now();
+        const hydeText = await generateHyDE(query, history);
+        const hydeMs = Math.round(performance.now() - t0);
+
+        const step0 = {
+          stepIndex: 0,
+          stepName: "query_rewrite",
+          durationMs: hydeMs,
+          data: JSON.stringify({ hydeText }),
+        };
+        collectedSteps.push(step0);
         controller.enqueue(
           encoder.encode(
-            sseEvent("status", { step: "searching", message: "Searching books..." })
+            sseEvent("step_complete", {
+              step: "query_rewrite",
+              stepIndex: 0,
+              durationMs: hydeMs,
+              data: { hydeText },
+            })
           )
         );
 
+        // 4. Step 1: Hybrid Search (keyword + vector in parallel, then fusion)
+        const t1 = performance.now();
+
         const [keywordResults, vectorResults] = await Promise.all([
-          // Path A: keyword search (uses original query, no HyDE dependency)
           (async () => {
             const cleanedQuery = cleanQueryForKeywordSearch(query);
             const results = await convex.query(api.chunks.textSearch, {
@@ -70,9 +95,7 @@ export async function POST(req: Request) {
             });
             return results as RetrievedChunk[];
           })(),
-          // Path B: dense search (HyDE → embed → vector search)
           (async () => {
-            const hydeText = await generateHyDE(query, history);
             const queryEmbedding = await embedText(hydeText);
             return (await convex.action(api.chunks.vectorSearch, {
               embedding: queryEmbedding,
@@ -81,46 +104,96 @@ export async function POST(req: Request) {
           })(),
         ]);
 
-        // 4. RRF fusion + dedup
         const fusedResults = reciprocalRankFusion(vectorResults, keywordResults);
         const searchResults = fusedResults.slice(0, 20);
+        const searchMs = Math.round(performance.now() - t1);
 
+        const step1 = {
+          stepIndex: 1,
+          stepName: "search",
+          durationMs: searchMs,
+          data: JSON.stringify({
+            keywordCount: keywordResults.length,
+            vectorCount: vectorResults.length,
+            fusedCount: searchResults.length,
+          }),
+        };
+        collectedSteps.push(step1);
+        controller.enqueue(
+          encoder.encode(
+            sseEvent("step_complete", {
+              step: "search",
+              stepIndex: 1,
+              durationMs: searchMs,
+              data: {
+                keywordCount: keywordResults.length,
+                vectorCount: vectorResults.length,
+                fusedCount: searchResults.length,
+              },
+            })
+          )
+        );
+
+        // Early exit: no results
         if (searchResults.length === 0) {
+          const noResultMsg = "I couldn't find any relevant information in your books to answer this question. Please make sure you've uploaded books that cover this topic.";
+          const messageId = await convex.mutation(api.messages.send, {
+            sessionId: sessionId as Id<"chatSessions">,
+            role: "assistant",
+            content: noResultMsg,
+          });
+          // Persist the partial steps we have
+          await convex.mutation(api.pipelineSteps.batchInsert, {
+            sessionId: sessionId as Id<"chatSessions">,
+            messageId,
+            steps: collectedSteps,
+          });
           controller.enqueue(
-            encoder.encode(
-              sseEvent("chunk", {
-                text: "I couldn't find any relevant information in your books to answer this question. Please make sure you've uploaded books that cover this topic.",
-              })
-            )
+            encoder.encode(sseEvent("chunk", { text: noResultMsg }))
           );
           controller.enqueue(
-            encoder.encode(sseEvent("done", { messageId: null }))
+            encoder.encode(sseEvent("done", { messageId }))
           );
           controller.close();
           return;
         }
 
-        // 5. Rerank
+        // 5. Step 2: Rerank
+        const t2 = performance.now();
+        const rerankedChunks = await rerankChunks(query, searchResults);
+        const rerankMs = Math.round(performance.now() - t2);
+
+        const step2 = {
+          stepIndex: 2,
+          stepName: "rerank",
+          durationMs: rerankMs,
+          data: JSON.stringify({
+            chunks: rerankedChunks.map((c) => ({
+              sectionPath: c.sectionPath,
+              score: c.score,
+              excerpt: c.content.slice(0, 150),
+            })),
+          }),
+        };
+        collectedSteps.push(step2);
         controller.enqueue(
           encoder.encode(
-            sseEvent("status", {
-              step: "reranking",
-              message: "Ranking results...",
+            sseEvent("step_complete", {
+              step: "rerank",
+              stepIndex: 2,
+              durationMs: rerankMs,
+              data: {
+                chunks: rerankedChunks.map((c) => ({
+                  sectionPath: c.sectionPath,
+                  score: c.score,
+                  excerpt: c.content.slice(0, 150),
+                })),
+              },
             })
           )
         );
-        const rerankedChunks = await rerankChunks(query, searchResults);
 
         // 6. Parent-section assembly
-        controller.enqueue(
-          encoder.encode(
-            sseEvent("status", {
-              step: "assembling",
-              message: "Assembling context...",
-            })
-          )
-        );
-
         const seenSectionIds = new Set<string>();
         const assembledSections: AssembledSection[] = [];
         const imageFilenames = new Set<string>();
@@ -147,13 +220,11 @@ export async function POST(req: Request) {
                 imageFilenames.add(filename);
                 bookIdsForImages.add(c.bookId);
               }
-              // For image-only blocks, use the full content as description
               if (c.blockType === "Figure" || c.blockType === "Picture") {
                 contentParts.push(
                   filenames.map(f => `[IMAGE: "${c.content}" | file: ${f}]`).join("\n\n")
                 );
               } else {
-                // Text block with embedded images — include content + image refs
                 contentParts.push(c.content);
                 for (const f of filenames) {
                   contentParts.push(`[IMAGE: file: ${f}]`);
@@ -194,15 +265,8 @@ export async function POST(req: Request) {
           );
         }
 
-        // 7. Stream answer generation
-        controller.enqueue(
-          encoder.encode(
-            sseEvent("status", {
-              step: "generating",
-              message: "Generating answer...",
-            })
-          )
-        );
+        // 7. Step 3: Stream answer generation
+        const t3 = performance.now();
 
         let fullAnswer = "";
         for await (const token of streamAnswer(
@@ -216,6 +280,25 @@ export async function POST(req: Request) {
             encoder.encode(sseEvent("chunk", { text: token }))
           );
         }
+
+        const generateMs = Math.round(performance.now() - t3);
+        const step3 = {
+          stepIndex: 3,
+          stepName: "generate",
+          durationMs: generateMs,
+          data: JSON.stringify({ totalDurationMs: generateMs }),
+        };
+        collectedSteps.push(step3);
+        controller.enqueue(
+          encoder.encode(
+            sseEvent("step_complete", {
+              step: "generate",
+              stepIndex: 3,
+              durationMs: generateMs,
+              data: { totalDurationMs: generateMs },
+            })
+          )
+        );
 
         // 8. Build citations
         const citations: PipelineCitation[] = assembledSections.map(
@@ -234,7 +317,12 @@ export async function POST(req: Request) {
           encoder.encode(sseEvent("citations", { citations }))
         );
 
-        // 9. Save assistant message
+        // 9. Emit done early so the UI can collapse the timeline promptly
+        controller.enqueue(
+          encoder.encode(sseEvent("done", {}))
+        );
+
+        // 10. Save assistant message
         const citationChunkIds = assembledSections.map(
           (s) => s.anchorChunkId as Id<"chunks">
         );
@@ -246,11 +334,14 @@ export async function POST(req: Request) {
           citationChunkIds,
         });
 
-        controller.enqueue(
-          encoder.encode(sseEvent("done", { messageId }))
-        );
+        // 11. Persist pipeline steps
+        await convex.mutation(api.pipelineSteps.batchInsert, {
+          sessionId: sessionId as Id<"chatSessions">,
+          messageId,
+          steps: collectedSteps,
+        });
 
-        // 10. Auto-generate title if first exchange
+        // 11. Auto-generate title if first exchange
         if (messages.length <= 1) {
           generateTitle(
             sessionId as Id<"chatSessions">,

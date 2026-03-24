@@ -7,9 +7,8 @@ import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
 import { ChatInput } from "./ChatInput";
 import { ChatMessage } from "./ChatMessage";
-import { StreamingIndicator } from "./StreamingIndicator";
+import { PipelineTimeline, PipelineStepUI } from "./PipelineTimeline";
 import { CitationSidebar } from "./CitationSidebar";
-import { Sparkles } from "lucide-react";
 
 export interface Citation {
   index: number;
@@ -29,7 +28,8 @@ export function ChatView() {
   );
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamedContent, setStreamedContent] = useState("");
-  const [streamStatus, setStreamStatus] = useState<string | null>(null);
+  const [pipelineSteps, setPipelineSteps] = useState<PipelineStepUI[]>([]);
+  const [pipelineComplete, setPipelineComplete] = useState(false);
   const [streamError, setStreamError] = useState<string | null>(null);
   const [citations, setCitations] = useState<Citation[]>([]);
   const [imageMap, setImageMap] = useState<Record<string, string>>({});
@@ -85,7 +85,8 @@ export function ChatView() {
 
       setIsStreaming(true);
       setStreamedContent("");
-      setStreamStatus("hyde");
+      setPipelineSteps([]);
+      setPipelineComplete(false);
       setStreamError(null);
       setCitations([]);
       setImageMap({});
@@ -137,18 +138,23 @@ export function ChatView() {
                   setStreamError(
                     parsed.message || "An unexpected error occurred"
                   );
-                  setStreamStatus(null);
-                } else if (currentEventType === "status") {
-                  setStreamStatus(parsed.step);
+                } else if (currentEventType === "step_complete") {
+                  const step: PipelineStepUI = {
+                    stepName: parsed.step,
+                    stepIndex: parsed.stepIndex,
+                    durationMs: parsed.durationMs,
+                    data: JSON.stringify(parsed.data),
+                    status: "complete",
+                  };
+                  setPipelineSteps((prev) => [...prev, step]);
                 } else if (currentEventType === "chunk") {
                   tokenBufferRef.current += parsed.text;
-                  setStreamStatus("generating");
                 } else if (currentEventType === "images") {
                   setImageMap(parsed.imageMap as Record<string, string>);
                 } else if (currentEventType === "citations") {
                   setCitations(parsed.citations);
                 } else if (currentEventType === "done") {
-                  // Stream complete
+                  setPipelineComplete(true);
                 }
               } catch {
                 // non-JSON data line
@@ -173,7 +179,6 @@ export function ChatView() {
           flushTimerRef.current = null;
         }
         setIsStreaming(false);
-        setStreamStatus(null);
       }
     },
     [sessionId, createSession]
@@ -244,6 +249,7 @@ export function ChatView() {
                 {messages?.map((msg: Doc<"messages">) => (
                   <ChatMessage
                     key={msg._id}
+                    messageId={msg._id}
                     role={msg.role}
                     content={msg.content}
                     citationChunkIds={msg.citationChunkIds}
@@ -253,9 +259,10 @@ export function ChatView() {
                 ))}
                 {isStreaming && (
                   <>
-                    {streamStatus && streamStatus !== "generating" && (
-                      <StreamingIndicator currentStep={streamStatus} />
-                    )}
+                    <PipelineTimeline
+                      steps={pipelineSteps}
+                      isComplete={pipelineComplete}
+                    />
                     {streamedContent && (
                       <ChatMessage
                         role="assistant"

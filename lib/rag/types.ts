@@ -35,6 +35,6 @@ export interface PipelineCitation {
 }
 
 export interface SSEEvent {
-  event: "status" | "chunk" | "citations" | "done" | "error";
+  event: "step_complete" | "chunk" | "images" | "citations" | "done" | "error";
   data: Record<string, unknown>;
 }

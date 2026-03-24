@@ -85,4 +85,15 @@ export default defineSchema({
   })
     .index("by_sessionId", ["sessionId"])
     .index("by_sessionId_and_createdAt", ["sessionId", "createdAt"]),
+
+  pipelineSteps: defineTable({
+    messageId: v.id("messages"),
+    sessionId: v.id("chatSessions"),
+    stepIndex: v.number(),
+    stepName: v.string(),
+    durationMs: v.number(),
+    data: v.string(),
+  })
+    .index("by_messageId", ["messageId"])
+    .index("by_sessionId", ["sessionId"]),
 });

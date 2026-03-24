@@ -13,6 +13,7 @@ import type * as books from "../books.js";
 import type * as chatSessions from "../chatSessions.js";
 import type * as chunks from "../chunks.js";
 import type * as messages from "../messages.js";
+import type * as pipelineSteps from "../pipelineSteps.js";
 import type * as sections from "../sections.js";
 
 import type {
@@ -27,6 +28,7 @@ declare const fullApi: ApiFromModules<{
   chatSessions: typeof chatSessions;
   chunks: typeof chunks;
   messages: typeof messages;
+  pipelineSteps: typeof pipelineSteps;
   sections: typeof sections;
 }>;
 
