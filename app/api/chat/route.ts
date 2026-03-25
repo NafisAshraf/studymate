@@ -67,7 +67,7 @@ export async function POST(req: Request) {
           llmMetrics: hydeResult.metrics,
         };
 
-        const step0 = {
+        const step0: CollectedPipelineStep = {
           stepIndex: 0,
           stepName: "query_rewrite",
           durationMs: hydeMs,
@@ -112,7 +112,7 @@ export async function POST(req: Request) {
         const searchResults = fusedResults.slice(0, 20);
         const searchMs = Math.round(performance.now() - t1);
 
-        const step1 = {
+        const step1: CollectedPipelineStep = {
           stepIndex: 1,
           stepName: "search",
           durationMs: searchMs,
@@ -176,7 +176,7 @@ export async function POST(req: Request) {
           llmMetrics: rerankMetrics,
         };
 
-        const step2 = {
+        const step2: CollectedPipelineStep = {
           stepIndex: 2,
           stepName: "rerank",
           durationMs: rerankMs,
@@ -299,7 +299,7 @@ export async function POST(req: Request) {
           totalDurationMs: generateMs,
           llmMetrics: generateMetrics,
         };
-        const step3 = {
+        const step3: CollectedPipelineStep = {
           stepIndex: 3,
           stepName: "generate",
           durationMs: generateMs,
