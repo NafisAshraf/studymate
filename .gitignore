@@ -49,5 +49,6 @@ next-env.d.ts
 .superpowers/
 .convex/
 
-# Local development
-datalab/
+datalab/*
+!datalab/scan_book.py
+!datalab/PDF_CONVERSION_GUIDE.md
